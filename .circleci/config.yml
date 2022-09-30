@@ -7,12 +7,14 @@ orbs:
 workflows:
   build:
     jobs:
-      - architect/go-build:
-          name: go-build
-          binary: loki-multi-tenant-proxy
-          filters:
-            tags:
-              only: /^v.*/
+      # Build is done in Dockerfile
+      # We should do go test, but currently fails
+      # - architect/go-build:
+      #     name: go-build
+      #     binary: loki-multi-tenant-proxy
+      #     filters:
+      #       tags:
+      #         only: /^v.*/
 
       - architect/push-to-docker:
           context: "architect"
@@ -21,8 +23,8 @@ workflows:
           username_envar: "DOCKER_USERNAME"
           password_envar: "DOCKER_PASSWORD"
           dockerfile: "build/package/Dockerfile"
-          requires:
-            - go-build
+          # requires:
+          #   - go-build
           # Needed to trigger job also on git tag.
           filters:
             tags:
@@ -31,12 +33,12 @@ workflows:
       - architect/push-to-docker:
           context: "architect"
           name: push-to-quay.io
-          image: "docker.io/giantswarm/loki-multi-tenant-proxy"
+          image: "quay.io/giantswarm/loki-multi-tenant-proxy"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           dockerfile: "build/package/Dockerfile"
-          requires:
-            - go-build
+          # requires:
+          #   - go-build
           # Needed to trigger job also on git tag.
           filters:
             tags:
@@ -49,8 +51,8 @@ workflows:
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           dockerfile: "build/package/Dockerfile"
-          requires:
-            - go-build
+          # requires:
+          #   - go-build
           # Needed to trigger job also on git tag.
           filters:
             tags:
