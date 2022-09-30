@@ -1,0 +1,57 @@
+---
+version: 2.1
+
+orbs:
+  architect: giantswarm/architect@4.24.0
+
+workflows:
+  build:
+    jobs:
+      - architect/go-build:
+          name: go-build
+          binary: loki-multi-tenant-proxy
+          filters:
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-to-docker.io
+          image: "docker.io/giantswarm/loki-multi-tenant-proxy"
+          username_envar: "DOCKER_USERNAME"
+          password_envar: "DOCKER_PASSWORD"
+          dockerfile: "build/package/Dockerfile"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-to-quay.io
+          image: "docker.io/giantswarm/loki-multi-tenant-proxy"
+          username_envar: "QUAY_USERNAME"
+          password_envar: "QUAY_PASSWORD"
+          dockerfile: "build/package/Dockerfile"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-to-aliyun
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/loki-multi-tenant-proxy"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          dockerfile: "build/package/Dockerfile"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
