@@ -91,7 +91,7 @@ Clone this repo to your local machine and setup "upstream copy" as remote to tra
 ```
 git clone git@github.com:giantswarm/loki-app.git
 cd loki-app
-git rm -r helm/{APP-NAME} && git commit -am "remove template chart" && git push  # optionally remove the chart template
+git rm -r helm/loki-multi-tenant-proxy && git commit -am "remove template chart" && git push  # optionally remove the chart template
 git remote add -f --no-tags upstream-copy git@github.com:giantswarm/grafana-helm-charts-upstream.git  # add remote
 ```
 
