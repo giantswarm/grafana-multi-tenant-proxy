@@ -3,7 +3,7 @@ package proxy
 import (
 	"testing"
 
-	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
+	"github.com/giantswarm/loki-multi-tenant-proxy/v2/internal/pkg"
 )
 
 func Test_isAuthorized(t *testing.T) {

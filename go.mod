@@ -1,4 +1,4 @@
-module github.com/giantswarm/loki-multi-tenant-proxy
+module github.com/giantswarm/loki-multi-tenant-proxy/v2
 
 go 1.12
 
