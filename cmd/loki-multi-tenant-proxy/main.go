@@ -4,7 +4,7 @@ import (
 	"os"
 
 	proxy "github.com/giantswarm/loki-multi-tenant-proxy/internal/app/loki-multi-tenant-proxy"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var (
