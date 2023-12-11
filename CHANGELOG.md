@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed:
 
-- Bump github.com/urfave/cli from 1.22.10 to 1.22.11
+- Bump github.com/urfave/cli from 1.22.10 to v2.26.0
 - Use zap as logger and log status code.
 
 ## [0.1.0] - 2022-10-11
