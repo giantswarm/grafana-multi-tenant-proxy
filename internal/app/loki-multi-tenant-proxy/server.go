@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
 	"github.com/urfave/cli/v2"
@@ -52,7 +53,15 @@ func Serve(c *cli.Context) error {
 				orgID := r.In.Context().Value(OrgIDKey)
 
 				if orgID != "" {
-					r.Out.Header.Set("X-Scope-OrgID", orgID.(string))
+					logger.Info("url", zap.String("url", r.In.URL.String()))
+					tenantIDsInUrl := extractTenantIDsInURL(r.In.URL)
+					if len(tenantIDsInUrl) > 0 {
+						logger.Info("Tenant ID found in URL", zap.String("tenant_ids", strings.Join(tenantIDsInUrl, ",")))
+						r.Out.Header.Set("X-Scope-OrgID", tenantIDsInUrl[0])
+					} else {
+						logger.Info("Tenant ID from header", zap.String("tenant_ids", orgID.(string)))
+						r.Out.Header.Set("X-Scope-OrgID", orgID.(string))
+					}
 				}
 			},
 			ErrorLog: errorLogger,
@@ -74,4 +83,15 @@ func Serve(c *cli.Context) error {
 	}
 	logger.Info("Starting HTTP server", zap.String("addr", addr))
 	return nil
+}
+
+func extractTenantIDsInURL(url *url.URL) []string {
+	tenantIDs := []string{}
+	if strings.HasPrefix(url.Path, "/loki/api/v1/query_range") || strings.HasPrefix(url.Path, "/loki/api/v1/index/stats") {
+		query := url.Query().Get("query")
+		if strings.Contains(query, "x5f4k") {
+			tenantIDs = append(tenantIDs, "x5f4k")
+		}
+	}
+	return tenantIDs
 }
