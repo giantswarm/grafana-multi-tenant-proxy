@@ -29,7 +29,7 @@ func Serve(c *cli.Context) error {
 		zapConfig := zap.NewProductionConfig()
 		level, err := zap.ParseAtomicLevel(logLevel)
 		if err != nil {
-			panic(fmt.Sprintf("Could not parse log level %v", zap.Error(err)))
+			return err
 		}
 		zapConfig.Level = level
 
@@ -39,7 +39,8 @@ func Serve(c *cli.Context) error {
 
 	errorLogger, err := zap.NewStdLogAt(logger, zap.ErrorLevel)
 	if err != nil {
-		logger.Fatal("Can not create error logger", zap.Error(err))
+		logger.Error("Could not create standard logger", zap.Error(err))
+		return err
 	}
 
 	var reverseProxy *httputil.ReverseProxy
@@ -70,7 +71,7 @@ func Serve(c *cli.Context) error {
 	http.HandleFunc("/", handlers)
 	server := &http.Server{Addr: addr, ErrorLog: errorLogger}
 	if err := server.ListenAndServe(); err != nil {
-		logger.Fatal("Loki multi tenant proxy can not start", zap.Error(err))
+		logger.Error("Loki multi tenant proxy could not start", zap.Error(err))
 		return err
 	}
 	logger.Info("Starting HTTP server", zap.String("addr", addr))
