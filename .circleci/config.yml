@@ -10,7 +10,7 @@ workflows:
      - architect/push-to-registries:
         context: architect
         name: push-to-registries
-        image: "docker.io/giantswarm/loki-multi-tenant-proxy-gs"
+        image: "giantswarm/loki-multi-tenant-proxy-gs"
         dockerfile: "build/package/Dockerfile-with-tests"
         filters:
           tags:
