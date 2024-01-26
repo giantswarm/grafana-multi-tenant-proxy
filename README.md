@@ -16,7 +16,7 @@ It is a basic golang proxy. It does basic auth, logs the requests and serves as 
 Actually, [Grafana loki](https://github.com/grafana/loki) does not check the auth of any request. The multi-tenant mechanism is based in a request header: `X-Scope-OrgID`. So, if you have untrusted tenants, you have to ensure a tenant uses it's own tenant-id/org-id and does not use any id of other tenants.
 
 Note *(temporary hard coded behavior)*:  
-This proxy handles also OAuth token and associates it to the `read` user specified in the auth-config file in order to set the request header `X-Scope-OrgID` with the OrgID related to the `read` user.  
+This proxy also accepts an OAuth token and associates it to the `read` user specified in the auth-config file in order to set the request header `X-Scope-OrgID` with the OrgID related to the `read` user.  
 This way, we can validate OAuth token support in loki-multi-tenant-proxy without changing the current behavior around OrgID management.
 
 ### Requirements
