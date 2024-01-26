@@ -16,19 +16,10 @@ import (
 
 type key int
 
-// Struct to represent the OAuth token payload section
+// Struct to represent the interesting part of the OAuth token payload section
 type Payload struct {
-	Iss           string   `json:"iss"`
-	Sub           string   `json:"sub"`
-	Aud           string   `json:"aud"`
-	Exp           int      `json:"exp"`
-	Iat           int      `json:"iat"`
-	AtHash        string   `json:"at_hash"`
-	CHash         string   `json:"c_hash"`
-	Email         string   `json:"email"`
-	EmailVerified bool     `json:"email_verified"`
-	Groups        []string `json:"groups"`
-	Name          string   `json:"name"`
+	Iss string `json:"iss"`
+	Aud string `json:"aud"`
 }
 
 const (
@@ -40,11 +31,11 @@ const (
 
 func Authentication(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, ok := r.Header["X-Id-Token"]
+		token, oauthTokenReceived := r.Header["X-Id-Token"]
 		var authenticationMode string
 		var user = "read" // default user if oauth mode
 		var pass = ""     // no password in oauth mode
-		if ok {
+		if oauthTokenReceived {
 			// OAuth token authentication mode (X-Id-Token header provided)
 			logger.Info("OAuth authentication mode")
 			logger.Info(fmt.Sprintf("Token = %s", token[0]))
@@ -54,10 +45,10 @@ func Authentication(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap
 				logger.Error(fmt.Sprintf("Error decoding token payload %s", token[0]), zap.Error(err))
 				return
 			}
-			// Token validation against Dex
-			err = validateOAuthToken(token[0], payload.Iss, payload.Aud, r.Context())
+			// Token validation against identity provider
+			err = validateOAuthToken(token[0], payload, r.Context())
 			if err != nil {
-				logger.Error(fmt.Sprintf("Error while validating OAuth token against DEX %s", token[0]), zap.Error(err))
+				logger.Error(fmt.Sprintf("Error while validating OAuth token against identity provider %s", token[0]), zap.Error(err))
 				writeUnauthorisedResponse(w, "oauth")
 				return
 			}
@@ -66,6 +57,7 @@ func Authentication(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap
 		} else {
 			// BasicAuth authentication mode (X-Id-Token header not provided) - default mode (use for write path)
 			logger.Info("BasicAuth authentication mode")
+			var ok bool
 			user, pass, ok = r.BasicAuth()
 			if !ok {
 				writeUnauthorisedResponse(w, "basic")
@@ -88,7 +80,7 @@ func Authentication(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap
 // and get OrgId to handle multi-tenant access
 func isAuthorized(user string, pass string, authConfig *pkg.Authn, authenticationMode string) (bool, string) {
 	for _, v := range authConfig.Users {
-		// OAuth mode: retrieve user 'read' et get OrgID
+		// OAuth mode: retrieve user 'read' and get OrgID
 		// BasicAuth mode: check user and password passed in the request and get OrgID
 		if (authenticationMode == "oauth" && subtle.ConstantTimeCompare([]byte(user), []byte(v.Username)) == 1) ||
 			(authenticationMode == "basic" && subtle.ConstantTimeCompare([]byte(user), []byte(v.Username)) == 1 && subtle.ConstantTimeCompare([]byte(pass), []byte(v.Password)) == 1) {
@@ -125,14 +117,14 @@ func decodeOAuthToken(token string) (Payload, error) {
 }
 
 // validateOAuthToken validates the OAuth token against Dex
-func validateOAuthToken(token string, dexUrl string, clientId string, ctx context.Context) error {
+func validateOAuthToken(token string, payload Payload, ctx context.Context) error {
 	// Initialize a provider by specifying dex's issuer URL.
-	provider, err := oidc.NewProvider(ctx, dexUrl)
+	provider, err := oidc.NewProvider(ctx, payload.Iss)
 	if err != nil {
 		return err
 	}
 	// Create an ID token parser, but only trust ID tokens issued to 'clientId'
-	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: clientId})
+	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: payload.Aud})
 	// Verify token validity
 	_, err = idTokenVerifier.Verify(ctx, token)
 	return err
