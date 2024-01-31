@@ -1,0 +1,75 @@
+package auth
+
+import (
+	"net/http"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+
+	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
+)
+
+func TestBasicAuthentication_IsAuthorized(t *testing.T) {
+	authConfig := &pkg.Authn{
+		Users: []pkg.User{
+			{
+				Username: "user1",
+				Password: "pass1",
+				OrgID:    "org1",
+			},
+			{
+				Username: "user2",
+				Password: "pass2",
+				OrgID:    "org2",
+			},
+		},
+		KeepOrgID: false,
+	}
+
+	logger := zap.NewNop()
+
+	tests := []struct {
+		name     string
+		user     string
+		pwd      string
+		expected bool
+		orgID    string
+	}{
+		{
+			name:     "Valid credentials",
+			user:     "user1",
+			pwd:      "pass1",
+			expected: true,
+			orgID:    "org1",
+		},
+		{
+			name:     "Invalid credentials",
+			user:     "user1",
+			pwd:      "wrongpass",
+			expected: false,
+			orgID:    "",
+		},
+		{
+			name:     "Empty credentials",
+			user:     "",
+			pwd:      "",
+			expected: false,
+			orgID:    "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			auth := BasicAuthentication{
+				user: tt.user,
+				pwd:  tt.pwd,
+			}
+
+			result, orgID := auth.IsAuthorized(&http.Request{}, authConfig, logger)
+
+			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.orgID, orgID)
+		})
+	}
+}
