@@ -8,6 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	realm = "Loki multi-tenant proxy"
+)
+
 type BasicAuthentication struct {
 	mode string
 	user string

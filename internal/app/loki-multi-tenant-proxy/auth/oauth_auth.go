@@ -14,6 +14,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	readUser = "read"
+)
+
 type OAuthAuthentication struct {
 	mode  string
 	token string

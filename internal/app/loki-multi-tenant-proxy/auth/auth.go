@@ -20,8 +20,6 @@ type Payload struct {
 const (
 	// OrgIDKey Key used to pass loki tenant id though the middleware context
 	OrgIDKey key = iota
-	realm        = "Loki multi-tenant proxy"
-	readUser     = "read"
 )
 
 // INTERFACE to handle different type of authentication
