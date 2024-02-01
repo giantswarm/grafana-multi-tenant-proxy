@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
 )
 
-func TestBasicAuthentication_IsAuthorized(t *testing.T) {
+func TestBasicAuthentication_Authenticate(t *testing.T) {
 	authConfig := &pkg.Authn{
 		Users: []pkg.User{
 			{
@@ -61,12 +61,14 @@ func TestBasicAuthentication_IsAuthorized(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth := BasicAuthentication{
-				user: tt.user,
-				pwd:  tt.pwd,
+			auth := BasicAuthenticator{
+				user:       tt.user,
+				pwd:        tt.pwd,
+				authConfig: authConfig,
+				logger:     logger,
 			}
 
-			result, orgID := auth.IsAuthorized(&http.Request{}, authConfig, logger)
+			result, orgID := auth.Authenticate(&http.Request{})
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.orgID, orgID)

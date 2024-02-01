@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -11,22 +12,15 @@ import (
 
 type key int
 
-// Struct to represent the interesting part of the OAuth token payload section
-type Payload struct {
-	Iss string `json:"iss"`
-	Aud string `json:"aud"`
-}
-
 const (
 	// OrgIDKey Key used to pass loki tenant id though the middleware context
 	OrgIDKey key = iota
 )
 
 // INTERFACE to handle different type of authentication
-type Authentication interface {
-	GetMode() string
-	IsAuthorized(r *http.Request, authConfig *pkg.Authn, logger *zap.Logger) (bool, string)
-	WriteUnauthorisedResponse(w http.ResponseWriter, logger *zap.Logger)
+type Authenticator interface {
+	Authenticate(r *http.Request) (bool, string)
+	OnAuthenticationError(w http.ResponseWriter)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////
@@ -38,11 +32,21 @@ func Authenticate(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap.L
 				logger.Info(fmt.Sprintf("Header %s = %s", name, value))
 			}
 		}
-		authent := getAuthentication(r, logger)
-		logger.Info(fmt.Sprintf("Authentication mode: %s", authent.GetMode()))
-		ok, orgID := authent.IsAuthorized(r, authConfig, logger)
+		for _, cookie := range r.Cookies() {
+			logger.Info(fmt.Sprintf("Cookie %s", cookie))
+		}
+
+		authent, err := getAuthentication(r, authConfig, logger)
+		if err != nil {
+			logger.Error(fmt.Sprintf("Error while authenticating request %s", r.URL), zap.Error(err))
+			w.WriteHeader(401)
+			w.Write([]byte("Unauthorised\n"))
+			return
+		}
+		logger.Debug(fmt.Sprintf("Authentication mode: %T", authent))
+		ok, orgID := authent.Authenticate(r)
 		if !ok {
-			authent.WriteUnauthorisedResponse(w, logger)
+			authent.OnAuthenticationError(w)
 			return
 		}
 		ctx := context.WithValue(r.Context(), OrgIDKey, orgID)
@@ -51,26 +55,26 @@ func Authenticate(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap.L
 }
 
 // getAuthentication returns the authentication mode used by the request and its credentials
-func getAuthentication(r *http.Request, logger *zap.Logger) Authentication {
+func getAuthentication(r *http.Request, authConfig *pkg.Authn, logger *zap.Logger) (Authenticator, error) {
 	// OAuth token is favorite authentication mode
 	token := r.Header.Get("X-Id-Token")
 	if token != "" {
 		logger.Info(fmt.Sprintf("Token = %s", token))
-		return OAuthAuthentication{
-			mode:  "oauth",
-			token: token,
-		}
+		return OAuthAuthenticator{
+			token:      token,
+			authConfig: authConfig,
+			logger:     logger,
+		}, nil
 	}
 	// If no oauth token, we are looking for basicAuth
 	user, pwd, ok := r.BasicAuth()
 	if ok {
-		return BasicAuthentication{
-			mode: "basic",
-			user: user,
-			pwd:  pwd,
-		}
+		return BasicAuthenticator{
+			user:       user,
+			pwd:        pwd,
+			authConfig: authConfig,
+			logger:     logger,
+		}, nil
 	}
-	return UnknowAuthentication{
-		mode: "unknown",
-	}
+	return nil, errors.New("No authentication found")
 }

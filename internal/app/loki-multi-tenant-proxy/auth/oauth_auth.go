@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	b64 "encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -18,33 +19,36 @@ const (
 	readUser = "read"
 )
 
-type OAuthAuthentication struct {
-	mode  string
-	token string
+// Struct to represent the interesting part of the OAuth token payload section
+type Payload struct {
+	Iss string `json:"iss"`
+	Aud string `json:"aud"`
 }
 
-func (a OAuthAuthentication) GetMode() string {
-	return a.mode
+type OAuthAuthenticator struct {
+	token      string
+	authConfig *pkg.Authn
+	logger     *zap.Logger
 }
 
-func (a OAuthAuthentication) IsAuthorized(r *http.Request, authConfig *pkg.Authn, logger *zap.Logger) (bool, string) {
+func (a OAuthAuthenticator) Authenticate(r *http.Request) (bool, string) {
 	// Decode OAuth token payload section
-	payload, err := a.decodeOAuthToken()
+	payload, err := a.extractPayload()
 	if err != nil {
-		logger.Error(fmt.Sprintf("Error decoding token payload %s", a.token), zap.Error(err))
+		a.logger.Error(fmt.Sprintf("Error decoding token payload %s", a.token), zap.Error(err))
 		return false, ""
 	}
 	// Token validation against identity provider
-	err = a.validateOAuthToken(payload, r.Context())
+	err = a.validate(payload, r.Context())
 	if err != nil {
-		logger.Error(fmt.Sprintf("Error while validating OAuth token against identity provider %s", a.token), zap.Error(err))
+		a.logger.Error(fmt.Sprintf("Error while validating OAuth token against identity provider %s", a.token), zap.Error(err))
 		return false, ""
 	}
 	// Retrieve OrgId for user 'read'
-	for _, v := range authConfig.Users {
+	for _, v := range a.authConfig.Users {
 		// Retrieve user 'read' and get OrgID
 		if subtle.ConstantTimeCompare([]byte(readUser), []byte(v.Username)) == 1 {
-			if !authConfig.KeepOrgID {
+			if !a.authConfig.KeepOrgID {
 				return true, v.OrgID
 			} else {
 				return true, ""
@@ -54,16 +58,20 @@ func (a OAuthAuthentication) IsAuthorized(r *http.Request, authConfig *pkg.Authn
 	return false, ""
 }
 
-func (a OAuthAuthentication) WriteUnauthorisedResponse(w http.ResponseWriter, logger *zap.Logger) {
-	logger.Error("OAuth authentication failed")
+func (a OAuthAuthenticator) OnAuthenticationError(w http.ResponseWriter) {
+	a.logger.Error("OAuth authentication failed")
 	w.WriteHeader(401)
 	w.Write([]byte("Unauthorised\n"))
 }
 
-// decodeOAuthToken decodes the payload section of the OAuth token
-func (a OAuthAuthentication) decodeOAuthToken() (Payload, error) {
+// extractPayload decodes the payload section of the OAuth token
+func (a OAuthAuthenticator) extractPayload() (Payload, error) {
 	// Get payload section from the token
-	payload := strings.Split(a.token, ".")[1]
+	sections := strings.Split(a.token, ".")
+	if len(sections) <= 1 {
+		return Payload{}, errors.New("Invalid token")
+	}
+	payload := sections[1]
 	payloadDecoded, err := b64.RawURLEncoding.DecodeString(payload)
 	if err != nil {
 		return Payload{}, err
@@ -74,8 +82,8 @@ func (a OAuthAuthentication) decodeOAuthToken() (Payload, error) {
 	return p, err
 }
 
-// validateOAuthToken validates the OAuth token against Dex
-func (a OAuthAuthentication) validateOAuthToken(payload Payload, ctx context.Context) error {
+// validate validates the OAuth token against Dex
+func (a OAuthAuthenticator) validate(payload Payload, ctx context.Context) error {
 	// Initialize a provider by specifying dex's issuer URL.
 	provider, err := oidc.NewProvider(ctx, payload.Iss)
 	if err != nil {
