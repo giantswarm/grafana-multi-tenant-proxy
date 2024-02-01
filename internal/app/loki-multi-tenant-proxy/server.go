@@ -12,14 +12,22 @@ import (
 	"go.uber.org/zap"
 )
 
+var keepOrgID bool
+var authConfigLocation string
+var authConfig *pkg.Authn
+
+func loadConfig() (*pkg.Authn, error) {
+	authConfig, err := pkg.ParseConfig(&authConfigLocation)
+	authConfig.KeepOrgID = keepOrgID
+	return authConfig, err
+}
+
 // Serve serves
 func Serve(c *cli.Context) error {
 	lokiServerURL, _ := url.Parse(c.String("loki-server"))
 	addr := fmt.Sprintf(":%d", c.Int("port"))
-	authConfigLocation := c.String("auth-config")
-	authConfig, _ := pkg.ParseConfig(&authConfigLocation)
-	authConfig.KeepOrgID = c.Bool("keep-orgid")
-
+	authConfigLocation = c.String("auth-config")
+	keepOrgID = c.Bool("keep-orgid")
 	logLevel := c.String("log-level")
 	if logLevel == "" {
 		logLevel = "INFO"
@@ -41,6 +49,11 @@ func Serve(c *cli.Context) error {
 	errorLogger, err := zap.NewStdLogAt(logger, zap.ErrorLevel)
 	if err != nil {
 		return cli.Exit(fmt.Sprintf("Could not create standard logger %v", err), -1)
+	}
+
+	authConfig, err = loadConfig()
+	if err != nil {
+		return cli.Exit(fmt.Sprintf("Could not parse config %v", err), -1)
 	}
 
 	var reverseProxy *httputil.ReverseProxy
@@ -70,6 +83,21 @@ func Serve(c *cli.Context) error {
 	)
 
 	http.HandleFunc("/", handlers)
+	http.HandleFunc("/-/reload", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, "Invalid request method.", http.StatusMethodNotAllowed)
+			return
+		}
+		authConfig, err = loadConfig()
+		if err != nil {
+			logger.Error("Could not reload config", zap.Error(err))
+			w.WriteHeader(500)
+		} else {
+			w.WriteHeader(200)
+			w.Write([]byte("OK"))
+		}
+	})
+
 	server := &http.Server{Addr: addr, ErrorLog: errorLogger}
 	if err := server.ListenAndServe(); err != nil {
 		return cli.Exit(fmt.Sprintf("Loki multi tenant proxy could not start %v", err), -1)
