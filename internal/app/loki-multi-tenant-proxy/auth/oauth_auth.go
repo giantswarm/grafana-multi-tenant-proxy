@@ -31,15 +31,18 @@ type OAuthAuthenticator struct {
 	logger     *zap.Logger
 }
 
+// Useful for testing and mock validate function
+var validateFunc = validate
+
 func (a OAuthAuthenticator) Authenticate(r *http.Request) (bool, string) {
 	// Decode OAuth token payload section
-	payload, err := a.extractPayload()
+	payload, err := extractPayload(a.token)
 	if err != nil {
 		a.logger.Error(fmt.Sprintf("Error decoding token payload %s", a.token), zap.Error(err))
 		return false, ""
 	}
 	// Token validation against identity provider
-	err = a.validate(payload, r.Context())
+	err = validateFunc(a.token, payload, r.Context())
 	if err != nil {
 		a.logger.Error(fmt.Sprintf("Error while validating OAuth token against identity provider %s", a.token), zap.Error(err))
 		return false, ""
@@ -65,9 +68,9 @@ func (a OAuthAuthenticator) OnAuthenticationError(w http.ResponseWriter) {
 }
 
 // extractPayload decodes the payload section of the OAuth token
-func (a OAuthAuthenticator) extractPayload() (Payload, error) {
+func extractPayload(token string) (Payload, error) {
 	// Get payload section from the token
-	sections := strings.Split(a.token, ".")
+	sections := strings.Split(token, ".")
 	if len(sections) <= 1 {
 		return Payload{}, errors.New("Invalid token")
 	}
@@ -83,7 +86,7 @@ func (a OAuthAuthenticator) extractPayload() (Payload, error) {
 }
 
 // validate validates the OAuth token against Dex
-func (a OAuthAuthenticator) validate(payload Payload, ctx context.Context) error {
+func validate(token string, payload Payload, ctx context.Context) error {
 	// Initialize a provider by specifying dex's issuer URL.
 	provider, err := oidc.NewProvider(ctx, payload.Iss)
 	if err != nil {
@@ -92,6 +95,6 @@ func (a OAuthAuthenticator) validate(payload Payload, ctx context.Context) error
 	// Create an ID token parser, but only trust ID tokens issued to 'clientId'
 	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: payload.Aud})
 	// Verify token validity
-	_, err = idTokenVerifier.Verify(ctx, a.token)
+	_, err = idTokenVerifier.Verify(ctx, token)
 	return err
 }

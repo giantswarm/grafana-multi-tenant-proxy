@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
 )
 
-func TestBasicAuthentication_Authenticate(t *testing.T) {
+func TestBasicAuthenticator_Authenticate(t *testing.T) {
 	authConfig := &pkg.Authn{
 		Users: []pkg.User{
 			{
