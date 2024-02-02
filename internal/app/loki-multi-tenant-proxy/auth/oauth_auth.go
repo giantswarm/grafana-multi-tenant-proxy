@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/coreos/go-oidc"
@@ -87,6 +88,13 @@ func extractPayload(token string) (Payload, error) {
 
 // validate validates the OAuth token against Dex
 func validate(token string, payload Payload, ctx context.Context) error {
+	oauthUrl := os.Getenv("OAUTH_URL")
+	if oauthUrl == "" {
+		return errors.New("OAUTH_URL not set")
+	}
+	if oauthUrl != payload.Iss {
+		return fmt.Errorf("Invalid issuer %s, expected issuer %s", payload.Iss, oauthUrl)
+	}
 	// Initialize a provider by specifying dex's issuer URL.
 	provider, err := oidc.NewProvider(ctx, payload.Iss)
 	if err != nil {
