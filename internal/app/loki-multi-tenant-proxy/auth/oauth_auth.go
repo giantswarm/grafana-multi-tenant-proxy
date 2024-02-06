@@ -88,9 +88,9 @@ func extractPayload(token string) (Payload, error) {
 
 // validate validates the OAuth token against Dex
 func validate(token string, payload Payload, ctx context.Context) error {
-	oauthUrl := os.Getenv("OAUTH_URL")
+	oauthUrl := os.Getenv("OAUTH_PROVIDER_URL")
 	if oauthUrl == "" {
-		return errors.New("OAUTH_URL environment variable not set")
+		return errors.New("OAUTH_PROVIDER_URL environment variable not set")
 	}
 	if oauthUrl != payload.Iss {
 		return fmt.Errorf("Invalid issuer %s, expected issuer %s", payload.Iss, oauthUrl)
