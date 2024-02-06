@@ -27,17 +27,17 @@ type Authenticator interface {
 // Authenticate can be used as a middleware chain to authenticate every request before proxying the request
 func Authenticate(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authent, err := newAuthenticator(r, authConfig, logger)
+		authenticator, err := newAuthenticator(r, authConfig, logger)
 		if err != nil {
 			logger.Error(fmt.Sprintf("Error while authenticating request %s", r.URL), zap.Error(err))
 			w.WriteHeader(401)
 			w.Write([]byte("Unauthorised\n"))
 			return
 		}
-		logger.Debug(fmt.Sprintf("Authentication mode: %T", authent))
-		ok, orgID := authent.Authenticate(r)
+		logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))
+		ok, orgID := authenticator.Authenticate(r)
 		if !ok {
-			authent.OnAuthenticationError(w)
+			authenticator.OnAuthenticationError(w)
 			return
 		}
 		ctx := context.WithValue(r.Context(), OrgIDKey, orgID)
