@@ -22,8 +22,8 @@ const (
 
 // Struct to represent the interesting part of the OAuth token payload section
 type Payload struct {
-	Iss string `json:"iss"`
-	Aud string `json:"aud"`
+	Issuer   string `json:"iss"`
+	Audience string `json:"aud"`
 }
 
 type OAuthAuthenticator struct {
@@ -92,16 +92,16 @@ func validate(token string, payload Payload, ctx context.Context) error {
 	if oauthUrl == "" {
 		return errors.New("OAUTH_PROVIDER_URL environment variable not set")
 	}
-	if oauthUrl != payload.Iss {
-		return fmt.Errorf("Invalid issuer %s, expected issuer %s", payload.Iss, oauthUrl)
+	if oauthUrl != payload.Issuer {
+		return fmt.Errorf("Invalid issuer %s, expected issuer %s", payload.Issuer, oauthUrl)
 	}
 	// Initialize a provider by specifying dex's issuer URL.
-	provider, err := oidc.NewProvider(ctx, payload.Iss)
+	provider, err := oidc.NewProvider(ctx, payload.Issuer)
 	if err != nil {
 		return err
 	}
 	// Create an ID token parser, but only trust ID tokens issued to 'clientId'
-	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: payload.Aud})
+	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: payload.Audience})
 	// Verify token validity
 	_, err = idTokenVerifier.Verify(ctx, token)
 	return err
