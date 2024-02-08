@@ -6,6 +6,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"github.com/giantswarm/loki-multi-tenant-proxy/internal/app/loki-multi-tenant-proxy/auth"
 	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
@@ -49,7 +50,7 @@ func Serve(c *cli.Context) error {
 				r.SetURL(lokiServerURL)
 				r.Out.Host = lokiServerURL.Host
 				r.Out.Header.Set("X-Forwarded-Host", lokiServerURL.Host)
-				orgID := r.In.Context().Value(OrgIDKey)
+				orgID := r.In.Context().Value(auth.OrgIDKey)
 
 				if orgID != "" {
 					r.Out.Header.Set("X-Scope-OrgID", orgID.(string))
@@ -60,9 +61,10 @@ func Serve(c *cli.Context) error {
 	}
 
 	handlers := Logger(
-		BasicAuth(
+		auth.Authenticate(
 			ReverseLoki(reverseProxy),
 			authConfig,
+			logger,
 		),
 		logger,
 	)
