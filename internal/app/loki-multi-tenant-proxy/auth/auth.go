@@ -22,27 +22,44 @@ type Authenticator interface {
 	Authenticate(r *http.Request) (bool, string)
 	OnAuthenticationError(w http.ResponseWriter)
 }
+type AuthenticationMiddleware struct {
+	handler    http.HandlerFunc
+	authConfig *pkg.Authn
+	logger     *zap.Logger
+}
+
+func NewAuthenticationMiddleware(logger *zap.Logger, handler http.HandlerFunc, authConfig pkg.Authn) *AuthenticationMiddleware {
+	return &AuthenticationMiddleware{
+		handler:    handler,
+		authConfig: &authConfig,
+		logger:     logger,
+	}
+}
 
 // ////////////////////////////////////////////////////////////////////////////////////
 // Authenticate can be used as a middleware chain to authenticate every request before proxying the request
-func Authenticate(handler http.HandlerFunc, authConfig *pkg.Authn, logger *zap.Logger) http.HandlerFunc {
+func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authenticator, err := newAuthenticator(r, authConfig, logger)
+		authenticator, err := newAuthenticator(r, am.authConfig, am.logger)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Error while authenticating request %s", r.URL), zap.Error(err))
+			am.logger.Error(fmt.Sprintf("Error while authenticating request %s", r.URL), zap.Error(err))
 			w.WriteHeader(401)
 			w.Write([]byte("Unauthorised\n"))
 			return
 		}
-		logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))
+		am.logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))
 		ok, orgID := authenticator.Authenticate(r)
 		if !ok {
 			authenticator.OnAuthenticationError(w)
 			return
 		}
 		ctx := context.WithValue(r.Context(), OrgIDKey, orgID)
-		handler(w, r.WithContext(ctx))
+		am.handler(w, r.WithContext(ctx))
 	}
+}
+
+func (am AuthenticationMiddleware) ApplyConfig(authConfig pkg.Authn) {
+	*am.authConfig = authConfig
 }
 
 // newAuthenticator returns the authentication mode used by the request and its credentials
@@ -67,5 +84,5 @@ func newAuthenticator(r *http.Request, authConfig *pkg.Authn, logger *zap.Logger
 			logger:     logger,
 		}, nil
 	}
-	return nil, errors.New("Unsupported authentication")
+	return nil, errors.New("unsupported authentication")
 }

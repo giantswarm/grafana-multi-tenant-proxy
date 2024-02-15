@@ -17,9 +17,9 @@ var authConfigLocation string
 var authConfig *pkg.Authn
 
 func loadConfig() (*pkg.Authn, error) {
-	authConfig, err := pkg.ParseConfig(&authConfigLocation)
-	authConfig.KeepOrgID = keepOrgID
-	return authConfig, err
+	config, err := pkg.ParseConfig(&authConfigLocation)
+	config.KeepOrgID = keepOrgID
+	return config, err
 }
 
 // Serve serves
@@ -73,12 +73,14 @@ func Serve(c *cli.Context) error {
 		}
 	}
 
+	authenticationMiddleware := auth.NewAuthenticationMiddleware(
+		logger,
+		ReverseLoki(reverseProxy),
+		*authConfig,
+	)
+
 	handlers := Logger(
-		auth.Authenticate(
-			ReverseLoki(reverseProxy),
-			authConfig,
-			logger,
-		),
+		authenticationMiddleware.Authenticate(),
 		logger,
 	)
 
@@ -88,11 +90,13 @@ func Serve(c *cli.Context) error {
 			http.Error(w, "Invalid request method.", http.StatusMethodNotAllowed)
 			return
 		}
-		authConfig, err = loadConfig()
+		authConfig, err := loadConfig()
+
 		if err != nil {
 			logger.Error("Could not reload config", zap.Error(err))
 			w.WriteHeader(500)
 		} else {
+			authenticationMiddleware.ApplyConfig(*authConfig)
 			w.WriteHeader(200)
 			w.Write([]byte("OK"))
 		}
