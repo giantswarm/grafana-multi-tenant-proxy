@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2024-02-19
+
 ### Added
 
 - Allow reload of config via the `/-/reload` endpoint.
@@ -34,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump github.com/urfave/cli from 1.21.0 to 1.22.10
 - Bump gopkg.in/yaml.v2 from 2.2.2 to 2.4.0
 
-[Unreleased]: https://github.com/giantswarm/loki-multi-tenant-proxy/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/giantswarm/loki-multi-tenant-proxy/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/giantswarm/loki-multi-tenant-proxy/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/giantswarm/loki-multi-tenant-proxy/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/giantswarm/loki-multi-tenant-proxy/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/giantswarm/loki-multi-tenant-proxy/compare/v0.0.0...v0.1.0
