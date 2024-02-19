@@ -73,7 +73,7 @@ func extractPayload(token string) (Payload, error) {
 	// Get payload section from the token
 	sections := strings.Split(token, ".")
 	if len(sections) <= 1 {
-		return Payload{}, errors.New("Invalid token")
+		return Payload{}, errors.New("invalid token")
 	}
 	payload := sections[1]
 	payloadDecoded, err := b64.RawURLEncoding.DecodeString(payload)
@@ -93,7 +93,7 @@ func validate(token string, payload Payload, ctx context.Context) error {
 		return errors.New("OAUTH_PROVIDER_URL environment variable not set")
 	}
 	if oauthUrl != payload.Issuer {
-		return fmt.Errorf("Invalid issuer %s, expected issuer %s", payload.Issuer, oauthUrl)
+		return fmt.Errorf("invalid issuer %s, expected issuer %s", payload.Issuer, oauthUrl)
 	}
 	// Initialize a provider by specifying dex's issuer URL.
 	provider, err := oidc.NewProvider(ctx, payload.Issuer)
