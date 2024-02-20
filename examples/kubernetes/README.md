@@ -43,7 +43,7 @@ Create datasources with the following configuration:
 ```
 name: Loki - Tenant1
 type: Loki
-url: http://loki-multi-tenant-proxy.grafana.svc.cluster.local:3100
+url: http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100
 basic-auth:
     username: Tenant1
     password: 1tnaneT
@@ -54,7 +54,7 @@ and
 ```
 name: Loki - Tenant2
 type: Loki
-url: http://loki-multi-tenant-proxy.grafana.svc.cluster.local:3100
+url: http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100
 basic-auth:
     username: Tenant2
     password: 2tnaneT
