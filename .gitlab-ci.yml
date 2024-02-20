@@ -49,11 +49,11 @@ build:
     - go mod download
     - mkdir binaries
   script:
-    - cd cmd/loki-multi-tenant-proxy
-    - GOOS=darwin GOARCH=amd64 go build -o loki-multi-tenant-proxy -ldflags="-X 'main.version=${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}' -X 'main.commit=${CI_COMMIT_SHORT_SHA}'"
-    - mv loki-multi-tenant-proxy ../../binaries/loki-multi-tenant-proxy-darwing-amd64
-    - GOOS=linux GOARCH=amd64 go build -o loki-multi-tenant-proxy -ldflags="-X 'main.version=${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}' -X 'main.commit=${CI_COMMIT_SHORT_SHA}'"
-    - mv loki-multi-tenant-proxy ../../binaries/loki-multi-tenant-proxy-linux-amd64
+    - cd cmd/grafana-multi-tenant-proxy
+    - GOOS=darwin GOARCH=amd64 go build -o grafana-multi-tenant-proxy -ldflags="-X 'main.version=${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}' -X 'main.commit=${CI_COMMIT_SHORT_SHA}'"
+    - mv grafana-multi-tenant-proxy ../../binaries/grafana-multi-tenant-proxy-darwing-amd64
+    - GOOS=linux GOARCH=amd64 go build -o grafana-multi-tenant-proxy -ldflags="-X 'main.version=${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}' -X 'main.commit=${CI_COMMIT_SHORT_SHA}'"
+    - mv grafana-multi-tenant-proxy ../../binaries/grafana-multi-tenant-proxy-linux-amd64
   artifacts:
     paths:
       - binaries/
@@ -107,10 +107,10 @@ github_release_candidate:
   variables:
     GITHUB_RELEASE_IS_PRE_RELEASE: "true"
     GITHUB_RELEASE_REPOSITORY_OWNER: "k8spin"
-    GITHUB_RELEASE_REPOSITORY_NAME: "loki-multi-tenant-proxy"
+    GITHUB_RELEASE_REPOSITORY_NAME: "grafana-multi-tenant-proxy"
     GITHUB_RELEASE_TITLE: "Release candidate ${CI_COMMIT_TAG}"
     GITHUB_RELEASE_GITHUB_ACCESS_TOKEN: ${GITHUB_TOKEN}
-    GITHUB_RELEASE_FILES: "binaries/loki-multi-tenant-proxy-darwing-amd64,binaries/loki-multi-tenant-proxy-linux-amd64"
+    GITHUB_RELEASE_FILES: "binaries/grafana-multi-tenant-proxy-darwing-amd64,binaries/grafana-multi-tenant-proxy-linux-amd64"
   only:
     - /^v([0-9]+)\.([0-9]+)\.([0-9]+)-rc([0-9]+)$/
 
@@ -120,9 +120,9 @@ github_release:
   variables:
     GITHUB_RELEASE_IS_PRE_RELEASE: "false"
     GITHUB_RELEASE_REPOSITORY_OWNER: "k8spin"
-    GITHUB_RELEASE_REPOSITORY_NAME: "loki-multi-tenant-proxy"
+    GITHUB_RELEASE_REPOSITORY_NAME: "grafana-multi-tenant-proxy"
     GITHUB_RELEASE_TITLE: "Release ${CI_COMMIT_TAG}"
     GITHUB_RELEASE_GITHUB_ACCESS_TOKEN: ${GITHUB_TOKEN}
-    GITHUB_RELEASE_FILES: "binaries/loki-multi-tenant-proxy-darwing-amd64,binaries/loki-multi-tenant-proxy-linux-amd64"
+    GITHUB_RELEASE_FILES: "binaries/grafana-multi-tenant-proxy-darwing-amd64,binaries/grafana-multi-tenant-proxy-linux-amd64"
   only:
     - /^v([0-9]+)\.([0-9]+)\.([0-9]+)$/
