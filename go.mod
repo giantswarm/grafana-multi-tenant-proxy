@@ -1,4 +1,4 @@
-module github.com/giantswarm/loki-multi-tenant-proxy
+module github.com/giantswarm/grafana-multi-tenant-proxy
 
 go 1.21
 

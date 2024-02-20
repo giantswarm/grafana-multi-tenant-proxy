@@ -6,8 +6,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/giantswarm/loki-multi-tenant-proxy/internal/app/loki-multi-tenant-proxy/auth"
-	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/auth"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 )
 
 func TestBasicAuthenticator_Authenticate(t *testing.T) {

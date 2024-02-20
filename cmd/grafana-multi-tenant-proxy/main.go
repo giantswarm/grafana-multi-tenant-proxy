@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	proxy "github.com/giantswarm/loki-multi-tenant-proxy/internal/app/loki-multi-tenant-proxy"
+	proxy "github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy"
 	"github.com/urfave/cli/v2"
 )
 
