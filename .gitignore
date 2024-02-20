@@ -12,4 +12,4 @@
 *.out
 
 # Binary
-cmd/loki-multi-tenant-proxy/loki-multi-tenant-proxy
+cmd/grafana-multi-tenant-proxy/grafana-multi-tenant-proxy
