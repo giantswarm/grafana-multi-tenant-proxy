@@ -19,6 +19,9 @@ func main() {
 	app.Authors = []*cli.Author{
 		{Name: "Angel Barrera", Email: "angel@k8spin.cloud"},
 		{Name: "Pau Rosello", Email: "pau@k8spin.cloud"},
+		{Name: "Herve Nicol", Email: "herve@giantswarm.io"},
+		{Name: "Quentin Bisson", Email: "quentin@giantswarm.io"},
+		{Name: "Marie Roque", Email: "marie@giantswarm.io"},
 	}
 	app.Commands = []*cli.Command{
 		{
