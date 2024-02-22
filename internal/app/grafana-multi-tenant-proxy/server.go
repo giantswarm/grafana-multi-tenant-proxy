@@ -24,7 +24,7 @@ func loadConfig() (*pkg.Authn, error) {
 
 // Serve serves
 func Serve(c *cli.Context) error {
-	lokiServerURL, _ := url.Parse(c.String("loki-server"))
+	targetServerURL, _ := url.Parse(c.String("target-server"))
 	addr := fmt.Sprintf(":%d", c.Int("port"))
 	authConfigLocation = c.String("auth-config")
 	keepOrgID = c.Bool("keep-orgid")
@@ -60,9 +60,9 @@ func Serve(c *cli.Context) error {
 	{
 		reverseProxy = &httputil.ReverseProxy{
 			Rewrite: func(r *httputil.ProxyRequest) {
-				r.SetURL(lokiServerURL)
-				r.Out.Host = lokiServerURL.Host
-				r.Out.Header.Set("X-Forwarded-Host", lokiServerURL.Host)
+				r.SetURL(targetServerURL)
+				r.Out.Host = targetServerURL.Host
+				r.Out.Header.Set("X-Forwarded-Host", targetServerURL.Host)
 				orgID := r.In.Context().Value(auth.OrgIDKey)
 
 				if orgID != "" {
@@ -75,7 +75,7 @@ func Serve(c *cli.Context) error {
 
 	authenticationMiddleware := auth.NewAuthenticationMiddleware(
 		logger,
-		ReverseLoki(reverseProxy),
+		ReverseTarget(reverseProxy),
 		*authConfig,
 	)
 
@@ -104,7 +104,7 @@ func Serve(c *cli.Context) error {
 
 	server := &http.Server{Addr: addr, ErrorLog: errorLogger}
 	if err := server.ListenAndServe(); err != nil {
-		return cli.Exit(fmt.Sprintf("Loki multi tenant proxy could not start %v", err), -1)
+		return cli.Exit(fmt.Sprintf("Grafana multi tenant proxy could not start %v", err), -1)
 	}
 	logger.Info("Starting HTTP server", zap.String("addr", addr))
 	return nil

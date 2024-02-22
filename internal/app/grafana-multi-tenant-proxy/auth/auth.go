@@ -13,7 +13,7 @@ import (
 type key int
 
 const (
-	// OrgIDKey Key used to pass loki tenant id though the middleware context
+	// OrgIDKey Key used to pass tenant id though the middleware context
 	OrgIDKey key = iota
 )
 

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	realm = "Loki multi-tenant proxy"
+	realm = "Grafana multi-tenant proxy"
 )
 
 type BasicAuthenticator struct {
