@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed project to `grafana-multi-tenant-proxy`
+- Renamed parameter `loki-server` to `target-server`
+
 ## [0.4.0] - 2024-02-19
 
 ### Added

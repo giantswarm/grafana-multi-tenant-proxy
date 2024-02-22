@@ -1,13 +1,15 @@
-# Grafana Loki - Multi tenant proxy
+# Grafana - Multi tenant proxy
 
-This project has been developed to make easy to deploy a [Grafana Loki Server](https://github.com/grafana/loki) in a multi-tenant way.
+This project has been developed to make easy to deploy a Grafana app like [Loki](https://github.com/grafana/loki) in a multi-tenant way.
 
 There is a lot of understanding about how it works.
 
 - [https://github.com/grafana/loki/issues/701](https://github.com/grafana/loki/issues/701)
 - [https://github.com/grafana/loki/issues/525](https://github.com/grafana/loki/issues/525)
 
-This works is almost based on [this issue comment](https://github.com/grafana/loki/issues/701#issuecomment-506504372).
+This work was forked from https://github.com/k8spin/loki-multi-tenant-proxy/ and is almost based on [this issue comment](https://github.com/grafana/loki/issues/701#issuecomment-506504372).
+
+It should work with all GrafanaLabs apps (Loki, Mimir, Tempo, Pyroscope...) but it is primarily meant to work with Loki. So the documentations and examples will mostly be based on [Loki](https://github.com/grafana/loki).
 
 ## What is it?
 
@@ -21,20 +23,20 @@ This way, we can validate OAuth token support in grafana-multi-tenant-proxy with
 
 ### Requirements
 
-To use this proxy, you have to configure your [Grafana Loki server](https://github.com/grafana/loki) with `auth_enabled: true` as described in the [offical docs](https://github.com/grafana/loki/blob/v0.3.0/docs/operations.md#multi-tenancy).
+To use this proxy, you have to configure your server (ie [Loki](https://github.com/grafana/loki)) with `auth_enabled: true` as described in the [offical docs](https://github.com/grafana/loki/blob/v0.3.0/docs/operations.md#multi-tenancy).
 
-Then put the proxy in front of your [Grafana Loki server](https://github.com/grafana/loki) instance, configure the auth proxy configuration, and run it.
+Then put the proxy in front of your server instances, configure the auth proxy configuration, and run it.
 
 ### Run it
 
 ```bash
-$ grafana-multi-tenant-proxy run --loki-server http://localhost:3500 --port 3501 --auth-config ./my-auth-config.yaml
+$ grafana-multi-tenant-proxy run --target-server http://localhost:3500 --port 3501 --auth-config ./my-auth-config.yaml
 ```
 
 Where:
 
 - `--port`: Port used to expose this proxy.
-- `--loki-server`: URL of your grafana loki instance.
+- `--target-server`: URL of your server instance.
 - `--auth-config`: Authentication configuration file path.
 - `--keep-orgid`: Don't change OrgID header.
 
@@ -127,7 +129,7 @@ go: extracting github.com/urfave/cli v1.21.0
 go: extracting gopkg.in/yaml.v2 v2.2.2
 root@6985c5523ed0:/go# ./grafana-multi-tenant-proxy
 NAME:
-   Loki Multitenant Proxy - Makes your Loki server multi tenant
+   Grafana Multitenant Proxy - Makes Grafana Labs applications multi tenant
 
 USAGE:
    grafana-multi-tenant-proxy [global options] command [command options] [arguments...]
@@ -139,7 +141,7 @@ AUTHOR:
    Ángel Barrera - @angelbarrera92
 
 COMMANDS:
-   run      Runs the Loki multi tenant proxy
+   run      Runs the Grafana multi tenant proxy
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
