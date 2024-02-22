@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )

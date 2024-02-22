@@ -4,7 +4,7 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"github.com/giantswarm/loki-multi-tenant-proxy/internal/pkg"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"go.uber.org/zap"
 )
 

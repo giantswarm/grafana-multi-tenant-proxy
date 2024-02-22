@@ -17,7 +17,7 @@ Actually, [Grafana loki](https://github.com/grafana/loki) does not check the aut
 
 Note *(temporary hard coded behavior)*:  
 This proxy also accepts an OAuth token and associates it to the `read` user specified in the auth-config file in order to set the request header `X-Scope-OrgID` with the OrgID related to the `read` user.  
-This way, we can validate OAuth token support in loki-multi-tenant-proxy without changing the current behavior around OrgID management.
+This way, we can validate OAuth token support in grafana-multi-tenant-proxy without changing the current behavior around OrgID management.
 
 ### Requirements
 
@@ -28,7 +28,7 @@ Then put the proxy in front of your [Grafana Loki server](https://github.com/gra
 ### Run it
 
 ```bash
-$ loki-multi-tenant-proxy run --loki-server http://localhost:3500 --port 3501 --auth-config ./my-auth-config.yaml
+$ grafana-multi-tenant-proxy run --loki-server http://localhost:3500 --port 3501 --auth-config ./my-auth-config.yaml
 ```
 
 Where:
@@ -81,7 +81,7 @@ server:
   http_listen_port: 9080
   grpc_listen_port: 0
 client:
-  url: http://loki-multi-tenant-proxy:3501/api/prom/push
+  url: http://grafana-multi-tenant-proxy:3501/api/prom/push
   basic_auth:
     username: User-a
     password: pass-a
@@ -108,14 +108,14 @@ If you want to build it from this repository, follow the instructions bellow:
 
 ```bash
 $ docker run -it --entrypoint /bin/bash --rm golang:latest
-root@6985c5523ed0:/go# git clone https://github.com/k8spin/loki-multi-tenant-proxy.git
-Cloning into 'loki-multi-tenant-proxy'...
+root@6985c5523ed0:/go# git clone https://github.com/giantswarm/grafana-multi-tenant-proxy.git
+Cloning into 'grafana-multi-tenant-proxy'...
 remote: Enumerating objects: 88, done.
 remote: Counting objects: 100% (88/88), done.
 remote: Compressing objects: 100% (64/64), done.
 remote: Total 88 (delta 26), reused 78 (delta 20), pack-reused 0
 Unpacking objects: 100% (88/88), done
-root@6985c5523ed0:/go# cd loki-multi-tenant-proxy/cmd/loki-multi-tenant-proxy/
+root@6985c5523ed0:/go# cd grafana-multi-tenant-proxy/cmd/grafana-multi-tenant-proxy/
 root@6985c5523ed0:/go# go build
 go: finding github.com/urfave/cli v1.21.0
 go: finding gopkg.in/yaml.v2 v2.2.2
@@ -125,12 +125,12 @@ go: downloading github.com/urfave/cli v1.21.0
 go: downloading gopkg.in/yaml.v2 v2.2.2
 go: extracting github.com/urfave/cli v1.21.0
 go: extracting gopkg.in/yaml.v2 v2.2.2
-root@6985c5523ed0:/go# ./loki-multi-tenant-proxy
+root@6985c5523ed0:/go# ./grafana-multi-tenant-proxy
 NAME:
    Loki Multitenant Proxy - Makes your Loki server multi tenant
 
 USAGE:
-   loki-multi-tenant-proxy [global options] command [command options] [arguments...]
+   grafana-multi-tenant-proxy [global options] command [command options] [arguments...]
 
 VERSION:
    dev
@@ -152,11 +152,11 @@ GLOBAL OPTIONS:
 If you want to build a container image with this proxy, simply run:
 
 ```bash
-$ docker build -t loki-multi-tenant-proxy:local -f build/package/Dockerfile .
+$ docker build -t grafana-multi-tenant-proxy:local -f build/package/Dockerfile .
 ```
 
 After built, just run it:
 
 ```bash
-$ docker run --rm loki-multi-tenant-proxy:local
+$ docker run --rm grafana-multi-tenant-proxy:local
 ```

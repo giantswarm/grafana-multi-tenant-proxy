@@ -79,7 +79,7 @@ stringData:
       http_listen_port: 9080
       grpc_listen_port: 0
     client:
-      url: http://loki-multi-tenant-proxy.grafana.svc.cluster.local:3100/api/prom/push
+      url: http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/api/prom/push
       basic_auth:
         username: Tenant2
         password: 2tnaneT
