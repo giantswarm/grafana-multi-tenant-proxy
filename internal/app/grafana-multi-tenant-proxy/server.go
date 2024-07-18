@@ -5,6 +5,12 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/auth"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
@@ -15,6 +21,33 @@ import (
 var keepOrgID bool
 var authConfigLocation string
 var authConfig *pkg.Authn
+
+var (
+	requestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "grafana_multi_tenant_proxy_http_requests_total",
+		Help: "Count of all HTTP requests",
+	}, []string{"handler", "code", "method"})
+
+	requestDuration = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:                            "grafana_multi_tenant_proxy_http_request_duration_seconds",
+			Help:                            "Histogram of latencies for HTTP requests.",
+			Buckets:                         []float64{.05, 0.1, .25, .5, .75, 1, 2, 5, 20, 60},
+			NativeHistogramBucketFactor:     1.1,
+			NativeHistogramMaxBucketNumber:  100,
+			NativeHistogramMinResetDuration: 1 * time.Hour,
+		},
+		[]string{"handler", "method"},
+	)
+	responseSize = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "grafana_multi_tenant_proxy_http_response_size_bytes",
+			Help:    "Histogram of response size for HTTP requests.",
+			Buckets: prometheus.ExponentialBuckets(100, 10, 7),
+		},
+		[]string{"handler", "method"},
+	)
+)
 
 func loadConfig() (*pkg.Authn, error) {
 	config, err := pkg.ParseConfig(&authConfigLocation)
@@ -84,7 +117,12 @@ func Serve(c *cli.Context) error {
 		logger,
 	)
 
-	http.HandleFunc("/", handlers)
+	// Register Prometheus collectors
+	prometheus.MustRegister(collectors.NewBuildInfoCollector())
+
+	// We handle metrics first to avoid calling the authentication middleware
+	http.Handle("/metrics", promhttp.Handler())
+	http.HandleFunc("/", instrumentHandler("authentication", handlers))
 	http.HandleFunc("/-/reload", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "Invalid request method.", http.StatusMethodNotAllowed)
@@ -108,4 +146,18 @@ func Serve(c *cli.Context) error {
 	}
 	logger.Info("Starting HTTP server", zap.String("addr", addr))
 	return nil
+}
+
+func instrumentHandler(handlerName string, handler http.HandlerFunc) http.HandlerFunc {
+	handlerLabel := prometheus.Labels{"handler": handlerName}
+	return promhttp.InstrumentHandlerDuration(
+		requestDuration.MustCurryWith(handlerLabel),
+		promhttp.InstrumentHandlerResponseSize(
+			responseSize.MustCurryWith(handlerLabel),
+			promhttp.InstrumentHandlerCounter(
+				requestsTotal.MustCurryWith(handlerLabel),
+				handler,
+			),
+		),
+	)
 }
