@@ -122,7 +122,7 @@ func Serve(c *cli.Context) error {
 
 	// We handle metrics first to avoid calling the authentication middleware
 	http.Handle("/metrics", promhttp.Handler())
-	http.HandleFunc("/", instrumentHandler("authentication", handlers))
+	http.HandleFunc("/", instrumentHandler("default", handlers))
 	http.HandleFunc("/-/reload", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "Invalid request method.", http.StatusMethodNotAllowed)
