@@ -28,7 +28,7 @@ type User struct {
 	OrgID    string `yaml:"orgid"`
 }
 
-// ParseConfig read a configuration file in the path `locatino` and returns a ProxyConfig object
+// ParseConfig read a configuration file in the path `location` and returns a ProxyConfig object
 func ParseProxyConfig(location string) (*ProxyConfig, error) {
 	data, err := os.ReadFile(location)
 	if err != nil {
