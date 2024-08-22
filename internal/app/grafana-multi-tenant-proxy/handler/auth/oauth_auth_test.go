@@ -30,8 +30,12 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 		Authentication: config.AuthenticationConfig{
 =======
 	config := &config.Config{
+<<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/oauth_auth_test.go
 		Authentication: &config.AuthenticationConfig{
 >>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/oauth_auth_test.go
+=======
+		Authentication: config.AuthenticationConfig{
+>>>>>>> 9801e1d (address reviews):internal/app/grafana-multi-tenant-proxy/auth/oauth_auth_test.go
 			Users: []config.User{
 				{
 					Username: "read",
@@ -53,6 +57,9 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 =======
 >>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/oauth_auth_test.go
 			},
+		},
+		Proxy: config.ProxyConfig{
+			KeepOrgID: false,
 		},
 	}
 

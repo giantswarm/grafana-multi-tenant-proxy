@@ -74,6 +74,7 @@ func TestReadAuthConfigFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+<<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/config/auth_config_test.go
 			got, err := readAuthConfigFile(tt.args.location)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("readAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
@@ -81,6 +82,15 @@ func TestReadAuthConfigFile(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("readAuthConfigFile() = %v, want %v", got, tt.want)
+=======
+			got, err := ReadAuthConfigFile(tt.args.location)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ReadAuthConfigFile() = %v, want %v", got, tt.want)
+>>>>>>> 9801e1d (address reviews):internal/app/grafana-multi-tenant-proxy/config/config_test.go
 			}
 		})
 	}
