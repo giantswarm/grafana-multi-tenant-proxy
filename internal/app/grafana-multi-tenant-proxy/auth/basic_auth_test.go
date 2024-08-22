@@ -12,7 +12,7 @@ import (
 
 func TestBasicAuthenticator_Authenticate(t *testing.T) {
 	config := &config.Config{
-		Authentication: &config.AuthenticationConfig{
+		Authentication: config.AuthenticationConfig{
 			Users: []config.User{
 				{
 					Username: "user1",
@@ -25,6 +25,9 @@ func TestBasicAuthenticator_Authenticate(t *testing.T) {
 					OrgID:    "org2",
 				},
 			},
+		},
+		Proxy: config.ProxyConfig{
+			KeepOrgID: false,
 		},
 	}
 

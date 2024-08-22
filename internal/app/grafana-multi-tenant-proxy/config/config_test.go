@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestParseAuthConfig(t *testing.T) {
+func TestReadAuthConfigFile(t *testing.T) {
 	configInvalidLocation := "../../../../configs/no.config.yaml"
 	configInvalidConfigFileLocation := "../../../../configs/bad.yaml"
 	configSampleLocation := "../../../../configs/sample.yaml"
@@ -74,13 +74,13 @@ func TestParseAuthConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseAuthConfig(tt.args.location)
+			got, err := ReadAuthConfigFile(tt.args.location)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseAuthConfig() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseAuthConfig() = %v, want %v", got, tt.want)
+				t.Errorf("ReadAuthConfigFile() = %v, want %v", got, tt.want)
 			}
 		})
 	}

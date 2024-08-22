@@ -14,7 +14,7 @@ import (
 
 func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 	config := &config.Config{
-		Authentication: &config.AuthenticationConfig{
+		Authentication: config.AuthenticationConfig{
 			Users: []config.User{
 				{
 					Username: "read",
@@ -27,6 +27,9 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 					OrgID:    "org1",
 				},
 			},
+		},
+		Proxy: config.ProxyConfig{
+			KeepOrgID: false,
 		},
 	}
 

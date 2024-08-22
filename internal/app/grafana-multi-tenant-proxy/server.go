@@ -113,16 +113,16 @@ func Serve(c *cli.Context) error {
 }
 
 func parseConfig(proxyConfigLocation string, authConfigLocation string) (config.Config, error) {
-	proxyConfig, err := config.ParseProxyConfig(proxyConfigLocation)
+	proxyConfig, err := config.ReadProxyConfigFile(proxyConfigLocation)
 	if err != nil {
 		return config.Config{}, err
 	}
-	authConfig, err := config.ParseAuthConfig(authConfigLocation)
+	authConfig, err := config.ReadAuthConfigFile(authConfigLocation)
 	if err != nil {
 		return config.Config{}, err
 	}
 	return config.Config{
-		Proxy:          proxyConfig,
-		Authentication: authConfig,
+		Proxy:          *proxyConfig,
+		Authentication: *authConfig,
 	}, nil
 }

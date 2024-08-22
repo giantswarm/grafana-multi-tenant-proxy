@@ -3,12 +3,12 @@ package config
 import (
 	"os"
 
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 type Config struct {
-	Proxy          *ProxyConfig
-	Authentication *AuthenticationConfig
+	Proxy          ProxyConfig
+	Authentication AuthenticationConfig
 }
 
 type ProxyConfig struct {
@@ -28,8 +28,8 @@ type User struct {
 	OrgID    string `yaml:"orgid"`
 }
 
-// ParseConfig read a configuration file in the path `location` and returns a ProxyConfig object
-func ParseProxyConfig(location string) (*ProxyConfig, error) {
+// ReadProxyConfigFile read a configuration file in the path `location` and returns a ProxyConfig object
+func ReadProxyConfigFile(location string) (*ProxyConfig, error) {
 	data, err := os.ReadFile(location)
 	if err != nil {
 		return nil, err
@@ -43,8 +43,8 @@ func ParseProxyConfig(location string) (*ProxyConfig, error) {
 	return &config, nil
 }
 
-// ParseAuthConfig read a configuration file in the path `location` and returns a Config object
-func ParseAuthConfig(location string) (*AuthenticationConfig, error) {
+// ReadAuthConfigFile read a configuration file in the path `location` and returns a Config object
+func ReadAuthConfigFile(location string) (*AuthenticationConfig, error) {
 	data, err := os.ReadFile(location)
 	if err != nil {
 		return nil, err
