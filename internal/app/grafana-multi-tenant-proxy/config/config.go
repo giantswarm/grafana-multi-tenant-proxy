@@ -21,7 +21,7 @@ type AuthenticationConfig struct {
 	Users []User `yaml:"users"`
 }
 
-// User Identifies a user including the tenant
+// User defines a user credentials and its tenant
 type User struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
