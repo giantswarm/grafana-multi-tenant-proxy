@@ -6,26 +6,28 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 )
 
 func TestOAuthAuthenticator_Authenticate(t *testing.T) {
-	authConfig := &pkg.Authn{
-		Users: []pkg.User{
-			{
-				Username: "read",
-				Password: "passread",
-				OrgID:    "giantswarm|default|wc-1|wc-2",
-			},
-			{
-				Username: "user1",
-				Password: "pass1",
-				OrgID:    "org1",
+	config := &config.Config{
+		Authentication: &config.AuthenticationConfig{
+			Users: []config.User{
+				{
+					Username: "read",
+					Password: "passread",
+					OrgID:    "giantswarm|default|wc-1|wc-2",
+				},
+				{
+					Username: "user1",
+					Password: "pass1",
+					OrgID:    "org1",
+				},
 			},
 		},
-		KeepOrgID: false,
 	}
 
 	logger := zap.NewNop()
@@ -56,9 +58,9 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			auth := OAuthAuthenticator{
-				token:      tt.token,
-				authConfig: authConfig,
-				logger:     logger,
+				token:  tt.token,
+				config: config,
+				logger: logger,
 			}
 
 			validateFunc = func(token string, payload Payload, ctx context.Context) error {

@@ -1,4 +1,5 @@
+
 users:
-  - username: Grafana
-    password: Loki
-    orgid: tenant-1
+- username: Grafana
+  password: Loki
+  orgid: tenant-1

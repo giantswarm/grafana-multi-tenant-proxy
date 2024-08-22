@@ -7,24 +7,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 )
 
 func TestBasicAuthenticator_Authenticate(t *testing.T) {
-	authConfig := &pkg.Authn{
-		Users: []pkg.User{
-			{
-				Username: "user1",
-				Password: "pass1",
-				OrgID:    "org1",
-			},
-			{
-				Username: "user2",
-				Password: "pass2",
-				OrgID:    "org2",
+	config := &config.Config{
+		Authentication: &config.AuthenticationConfig{
+			Users: []config.User{
+				{
+					Username: "user1",
+					Password: "pass1",
+					OrgID:    "org1",
+				},
+				{
+					Username: "user2",
+					Password: "pass2",
+					OrgID:    "org2",
+				},
 			},
 		},
-		KeepOrgID: false,
 	}
 
 	logger := zap.NewNop()
@@ -62,10 +63,10 @@ func TestBasicAuthenticator_Authenticate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			auth := BasicAuthenticator{
-				user:       tt.user,
-				pwd:        tt.pwd,
-				authConfig: authConfig,
-				logger:     logger,
+				user:   tt.user,
+				pwd:    tt.pwd,
+				config: config,
+				logger: logger,
 			}
 
 			result, orgID := auth.Authenticate(&http.Request{})

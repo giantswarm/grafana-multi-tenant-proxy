@@ -12,8 +12,9 @@ import (
 	"strings"
 
 	"github.com/coreos/go-oidc"
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"go.uber.org/zap"
+
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 )
 
 const (
@@ -27,9 +28,9 @@ type Payload struct {
 }
 
 type OAuthAuthenticator struct {
-	token      string
-	authConfig *pkg.Authn
-	logger     *zap.Logger
+	token  string
+	config *config.Config
+	logger *zap.Logger
 }
 
 // Useful for testing and mock validate function
@@ -42,6 +43,7 @@ func (a OAuthAuthenticator) Authenticate(r *http.Request) (bool, string) {
 		a.logger.Error(fmt.Sprintf("Error decoding token payload %s", a.token), zap.Error(err))
 		return false, ""
 	}
+
 	// Token validation against identity provider
 	err = validateFunc(a.token, payload, r.Context())
 	if err != nil {
@@ -49,10 +51,10 @@ func (a OAuthAuthenticator) Authenticate(r *http.Request) (bool, string) {
 		return false, ""
 	}
 	// Retrieve OrgId for user 'read'
-	for _, v := range a.authConfig.Users {
+	for _, v := range a.config.Authentication.Users {
 		// Retrieve user 'read' and get OrgID
 		if subtle.ConstantTimeCompare([]byte(readUser), []byte(v.Username)) == 1 {
-			if !a.authConfig.KeepOrgID {
+			if !a.config.Proxy.KeepOrgID {
 				return true, v.OrgID
 			} else {
 				return true, ""

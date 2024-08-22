@@ -4,8 +4,9 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"go.uber.org/zap"
+
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 )
 
 const (
@@ -13,17 +14,17 @@ const (
 )
 
 type BasicAuthenticator struct {
-	user       string
-	pwd        string
-	authConfig *pkg.Authn
-	logger     *zap.Logger
+	user   string
+	pwd    string
+	config *config.Config
+	logger *zap.Logger
 }
 
 func (a BasicAuthenticator) Authenticate(r *http.Request) (bool, string) {
-	for _, v := range a.authConfig.Users {
+	for _, v := range a.config.Authentication.Users {
 		// Check user and password passed in the request and get OrgID
 		if subtle.ConstantTimeCompare([]byte(a.user), []byte(v.Username)) == 1 && subtle.ConstantTimeCompare([]byte(a.pwd), []byte(v.Password)) == 1 {
-			if !a.authConfig.KeepOrgID {
+			if !a.config.Proxy.KeepOrgID {
 				return true, v.OrgID
 			} else {
 				return true, ""
