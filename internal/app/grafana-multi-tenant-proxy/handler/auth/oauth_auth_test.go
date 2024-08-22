@@ -13,6 +13,7 @@ import (
 )
 
 func TestOAuthAuthenticator_Authenticate(t *testing.T) {
+<<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/oauth_auth_test.go
 	expectedTargetServer := config.TargetServer{
 		Name:      "example",
 		Host:      "http://example.com",
@@ -27,6 +28,10 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 	}
 	config := &config.Config{
 		Authentication: config.AuthenticationConfig{
+=======
+	config := &config.Config{
+		Authentication: &config.AuthenticationConfig{
+>>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/oauth_auth_test.go
 			Users: []config.User{
 				{
 					Username: "read",
@@ -38,12 +43,15 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 					Password: "pass1",
 					OrgID:    "org1",
 				},
+<<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/oauth_auth_test.go
 			},
 		},
 		Proxy: config.ProxyConfig{
 			TargetServers: []config.TargetServer{
 				expectedTargetServer,
 				unexpectedTargetServer,
+=======
+>>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/oauth_auth_test.go
 			},
 		},
 	}

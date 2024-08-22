@@ -17,7 +17,7 @@ type TargetServer struct {
 	KeepOrgID bool   `yaml:"keepOrgId"`
 }
 
-// ReadProxyConfigFile read a configuration file in the path `location` and returns a ProxyConfig object
+// readProxyConfigFile read a configuration file in the path `location` and returns a ProxyConfig object
 func readProxyConfigFile(location string) (*ProxyConfig, error) {
 	data, err := os.ReadFile(location)
 	if err != nil {

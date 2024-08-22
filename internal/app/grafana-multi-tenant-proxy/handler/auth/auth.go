@@ -30,10 +30,17 @@ type AuthenticationMiddleware struct {
 	logger  *zap.Logger
 }
 
+<<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/auth.go
 func NewAuthenticationMiddleware(config *config.Config, logger *zap.Logger, handler http.HandlerFunc) *AuthenticationMiddleware {
 	return &AuthenticationMiddleware{
 		handler: handler,
 		config:  config,
+=======
+func NewAuthenticationMiddleware(config config.Config, logger *zap.Logger, handler http.HandlerFunc) *AuthenticationMiddleware {
+	return &AuthenticationMiddleware{
+		handler: handler,
+		config:  &config,
+>>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/auth.go
 		logger:  logger,
 	}
 }
@@ -73,8 +80,13 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 	}
 }
 
+<<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/auth.go
 func (am AuthenticationMiddleware) ApplyConfig(config *config.Config) {
 	*am.config = *config
+=======
+func (am AuthenticationMiddleware) ApplyConfig(config config.Config) {
+	*am.config = config
+>>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/auth.go
 }
 
 // newAuthenticator returns the authentication mode used by the request and its credentials
