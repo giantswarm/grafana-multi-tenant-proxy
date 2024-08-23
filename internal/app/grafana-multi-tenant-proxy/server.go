@@ -84,21 +84,3 @@ func Serve(c *cli.Context) error {
 	logger.Info("Starting HTTP server", zap.String("addr", addr))
 	return nil
 }
-<<<<<<< HEAD
-=======
-
-func parseConfig(proxyConfigLocation string, authConfigLocation string) (config.Config, error) {
-	proxyConfig, err := config.ReadProxyConfigFile(proxyConfigLocation)
-	if err != nil {
-		return config.Config{}, err
-	}
-	authConfig, err := config.ReadAuthConfigFile(authConfigLocation)
-	if err != nil {
-		return config.Config{}, err
-	}
-	return config.Config{
-		Proxy:          *proxyConfig,
-		Authentication: *authConfig,
-	}, nil
-}
->>>>>>> 9801e1d (address reviews)
