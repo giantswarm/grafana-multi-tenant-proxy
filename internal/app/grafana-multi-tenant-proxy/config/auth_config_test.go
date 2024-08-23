@@ -74,13 +74,13 @@ func TestReadAuthConfigFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ReadAuthConfigFile(tt.args.location)
+			got, err := readAuthConfigFile(tt.args.location)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("readAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ReadAuthConfigFile() = %v, want %v", got, tt.want)
+				t.Errorf("readAuthConfigFile() = %v, want %v", got, tt.want)
 			}
 		})
 	}
