@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
       - name: grafana-multi-tenant-proxy
-        image: giantswarm/grafana-multi-tenant-proxy:dev
+        image: angelbarrera92/grafana-multi-tenant-proxy:dev
         args:
           - "run"
           - "--port=3100"
@@ -81,13 +81,7 @@ spec:
           - name: http
             containerPort: 3100
             protocol: TCP
-        resources:
-          limits:
-            cpu: 100m
-            memory: 128Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi
+        resources: {}
         volumeMounts:
           - name: config
             mountPath: /etc/grafana-multi-tenant-proxy
