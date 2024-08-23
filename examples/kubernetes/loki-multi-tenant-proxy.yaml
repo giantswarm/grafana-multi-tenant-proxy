@@ -89,7 +89,7 @@ spec:
     spec:
       containers:
       - name: grafana-multi-tenant-proxy
-        image: giantswarm/grafana-multi-tenant-proxy:dev
+        image: angelbarrera92/grafana-multi-tenant-proxy:dev
         args:
           - "run"
           - "--port=3100"
