@@ -71,13 +71,7 @@ spec:
           - name: http
             containerPort: 3100
             protocol: TCP
-        resources:
-          limits:
-            cpu: 100m
-            memory: 128Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi
+        resources: {}
         volumeMounts:
           - name: config
             mountPath: /etc/grafana-multi-tenant-proxy
