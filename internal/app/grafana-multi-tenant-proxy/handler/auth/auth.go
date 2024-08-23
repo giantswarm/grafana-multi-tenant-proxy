@@ -20,7 +20,7 @@ const (
 
 // INTERFACE to handle different type of authentication
 type Authenticator interface {
-	Authenticate(r *http.Request) (bool, string)
+	Authenticate(r *http.Request, targetServer *config.TargetServer) (bool, string)
 	OnAuthenticationError(w http.ResponseWriter)
 }
 
@@ -49,8 +49,16 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 			w.Write([]byte("Unauthorised\n"))
 			return
 		}
+
+		targetServer := am.config.Proxy.FindTargetServer(r.Host)
+		if targetServer != nil {
+			am.logger.Error("Target server not configured")
+			w.WriteHeader(404)
+			w.Write([]byte("Not found\n"))
+		}
+
 		am.logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))
-		ok, orgID := authenticator.Authenticate(r)
+		ok, orgID := authenticator.Authenticate(r, targetServer)
 		if !ok {
 			authenticator.OnAuthenticationError(w)
 			return

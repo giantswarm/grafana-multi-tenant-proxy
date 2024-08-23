@@ -8,13 +8,13 @@ import (
 
 type ProxyConfig struct {
 	TargetServers []TargetServer `yaml:"targetServers"`
-	KeepOrgID     bool           `yaml:"keepOrgId"`
 }
 
 type TargetServer struct {
-	Name   string `yaml:"name"`
-	Host   string `yaml:"host"`
-	Target string `yaml:"target"`
+	Name      string `yaml:"name"`
+	Host      string `yaml:"host"`
+	Target    string `yaml:"target"`
+	KeepOrgID bool   `yaml:"keepOrgId"`
 }
 
 // ReadProxyConfigFile read a configuration file in the path `location` and returns a ProxyConfig object
@@ -30,4 +30,13 @@ func readProxyConfigFile(location string) (*ProxyConfig, error) {
 	}
 
 	return &config, nil
+}
+
+func (p ProxyConfig) FindTargetServer(host string) *TargetServer {
+	for _, v := range p.TargetServers {
+		if v.Host == host {
+			return &v
+		}
+	}
+	return nil
 }

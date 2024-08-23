@@ -1,4 +1,4 @@
-package proxy
+package handler
 
 import (
 	"log"
@@ -6,46 +6,55 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/auth"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler/auth"
+	"go.uber.org/zap"
 )
 
 type Proxy struct {
 	proxies     map[string]*httputil.ReverseProxy
 	proxyConfig *config.ProxyConfig
+	logger      *zap.Logger
 	errorLogger *log.Logger
 }
 
-func NewProxy(config config.Config, errorLogger *log.Logger) Proxy {
+func NewProxy(config config.Config, logger *zap.Logger, errorLogger *log.Logger) Proxy {
 	return Proxy{
 		proxies:     make(map[string]*httputil.ReverseProxy),
 		proxyConfig: &config.Proxy,
+		logger:      logger,
 		errorLogger: errorLogger,
 	}
 }
 
 func (p Proxy) ApplyConfig(config config.Config) {
 	*p.proxyConfig = config.Proxy
+	// Clear the existing proxies
+	for k := range p.proxies {
+		delete(p.proxies, k)
+	}
 }
 
 // Create the reverse proxy handler to target server
 func (p Proxy) Handler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		host := r.Host
-
-		if proxy, ok := p.proxies[host]; ok {
+		if proxy, ok := p.proxies[r.Host]; ok {
 			proxy.ServeHTTP(w, r)
 			return
 		}
 
-		for _, v := range p.proxyConfig.TargetServers {
-			if v.Host == host {
-				proxy := p.newProxy(v.Target)
-				p.proxies[host] = proxy
-				proxy.ServeHTTP(w, r)
-				return
-			}
+		// Find the target server for the host
+		server := p.proxyConfig.FindTargetServer(r.Host)
+		if server != nil {
+			proxy := p.newProxy(server.Target)
+			p.proxies[r.Host] = proxy
+			proxy.ServeHTTP(w, r)
+			return
 		}
+
+		p.errorLogger.Print("Target server not configured")
+		w.WriteHeader(404)
+		w.Write([]byte("Not Found\n"))
 	}
 }
 

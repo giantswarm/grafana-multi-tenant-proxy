@@ -36,7 +36,7 @@ type OAuthAuthenticator struct {
 // Useful for testing and mock validate function
 var validateFunc = validate
 
-func (a OAuthAuthenticator) Authenticate(r *http.Request) (bool, string) {
+func (a OAuthAuthenticator) Authenticate(r *http.Request, targetServer *config.TargetServer) (bool, string) {
 	// Decode OAuth token payload section
 	payload, err := extractPayload(a.token)
 	if err != nil {
@@ -54,7 +54,7 @@ func (a OAuthAuthenticator) Authenticate(r *http.Request) (bool, string) {
 	for _, v := range a.config.Authentication.Users {
 		// Retrieve user 'read' and get OrgID
 		if subtle.ConstantTimeCompare([]byte(readUser), []byte(v.Username)) == 1 {
-			if !a.config.Proxy.KeepOrgID {
+			if !targetServer.KeepOrgID {
 				return true, v.OrgID
 			} else {
 				return true, ""

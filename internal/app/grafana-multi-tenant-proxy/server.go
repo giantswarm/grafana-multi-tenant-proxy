@@ -7,8 +7,9 @@ import (
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/auth"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler/auth"
 )
 
 func initLogger(logLevel string) (*zap.Logger, error) {
@@ -38,7 +39,7 @@ func Serve(c *cli.Context) error {
 
 	errorLogger, err := zap.NewStdLogAt(logger, zap.ErrorLevel)
 	if err != nil {
-		return cli.Exit(fmt.Sprintf("Could not create error logger %v", err), -1)
+		return cli.Exit(fmt.Sprintf("Could not create standard error logger %v", err), -1)
 	}
 
 	// Read the configuration
@@ -49,9 +50,9 @@ func Serve(c *cli.Context) error {
 		return cli.Exit(fmt.Sprintf("Could not parse config %v", err), -1)
 	}
 
-	proxy := NewProxy(cfg, errorLogger)
+	proxy := handler.NewProxy(cfg, logger, errorLogger)
 	authenticationMiddleware := auth.NewAuthenticationMiddleware(cfg, logger, proxy.Handler())
-	handlers := Logger(authenticationMiddleware.Authenticate(), logger)
+	handlers := handler.Logger(authenticationMiddleware.Authenticate(), logger)
 
 	http.HandleFunc("/", handlers)
 

@@ -25,8 +25,18 @@ metadata:
     app: grafana-multi-tenant-proxy
 stringData:
   config.yaml: |-
-    targetServerUrl: http://loki.grafana.svc.cluster.local:3100
-    keepOrgId: true
+    targetServers:
+    - name: "loki-read"
+      host: "http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/loki-read"
+      target: "http://loki-read.grafana.svc.cluster.local:3100"
+    - name: "loki-write"
+      host: "http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/loki-write"
+      target: "http://loki-write.grafana.svc.cluster.local:3100"
+      keepOrgId: true
+    - name: "loki-backend"
+      host: "http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/loki-backend"
+      target: "http://loki-backend.grafana.svc.cluster.local:3100"
+      keepOrgId: true
 ---
 apiVersion: v1
 kind: Service
