@@ -58,6 +58,7 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 		}
 
 		targetServer := am.config.Proxy.FindTargetServer(r.Host)
+<<<<<<< HEAD
 		if targetServer == nil {
 			am.logger.Error("Target server not configured",
 				zap.String("host", r.Host),
@@ -67,6 +68,12 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 			w.WriteHeader(404)
 			w.Write([]byte("Not found\n"))
 			return
+=======
+		if targetServer != nil {
+			am.logger.Error("Target server not configured")
+			w.WriteHeader(404)
+			w.Write([]byte("Not found\n"))
+>>>>>>> e5eff05 (support-multiple-hosts-from-one-config)
 		}
 
 		am.logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))

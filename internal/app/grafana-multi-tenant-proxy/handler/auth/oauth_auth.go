@@ -54,11 +54,15 @@ func (a OAuthAuthenticator) Authenticate(r *http.Request, targetServer *config.T
 	for _, v := range a.config.Authentication.Users {
 		// Retrieve user 'read' and get OrgID
 		if subtle.ConstantTimeCompare([]byte(readUser), []byte(v.Username)) == 1 {
+<<<<<<< HEAD
 <<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/oauth_auth.go
 			if !targetServer.KeepOrgID {
 =======
 			if !a.config.Proxy.KeepOrgID {
 >>>>>>> 2eb33b2 (Improve config management):internal/app/grafana-multi-tenant-proxy/auth/oauth_auth.go
+=======
+			if !targetServer.KeepOrgID {
+>>>>>>> e5eff05 (support-multiple-hosts-from-one-config)
 				return true, v.OrgID
 			} else {
 				return true, ""

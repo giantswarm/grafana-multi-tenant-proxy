@@ -13,7 +13,10 @@ import (
 )
 
 func TestOAuthAuthenticator_Authenticate(t *testing.T) {
+<<<<<<< HEAD
 <<<<<<< HEAD:internal/app/grafana-multi-tenant-proxy/handler/auth/oauth_auth_test.go
+=======
+>>>>>>> e5eff05 (support-multiple-hosts-from-one-config)
 	expectedTargetServer := config.TargetServer{
 		Name:      "example",
 		Host:      "http://example.com",
@@ -59,7 +62,10 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 			},
 		},
 		Proxy: config.ProxyConfig{
-			KeepOrgID: false,
+			TargetServers: []config.TargetServer{
+				expectedTargetServer,
+				unexpectedTargetServer,
+			},
 		},
 	}
 
