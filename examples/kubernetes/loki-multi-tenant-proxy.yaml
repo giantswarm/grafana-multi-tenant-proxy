@@ -27,16 +27,12 @@ stringData:
   config.yaml: |-
     targetServers:
     - name: "loki-read"
-      host: "http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/loki-read"
-      target: "http://loki-read.grafana.svc.cluster.local:3100"
+      host: "http://read.loki.giantswarm.io"
+      target: "http://loki-gateway.grafana.svc.cluster.local:3100"
     - name: "loki-write"
-      host: "http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/loki-write"
-      target: "http://loki-write.grafana.svc.cluster.local:3100"
-      keepOrgId: true
-    - name: "loki-backend"
-      host: "http://grafana-multi-tenant-proxy.grafana.svc.cluster.local:3100/loki-backend"
-      target: "http://loki-backend.grafana.svc.cluster.local:3100"
-      keepOrgId: true
+      host: "http://write.loki.giantswarm.io"
+      target: "http://loki-gateway.grafana.svc.cluster.local:3100"
+      keepOrgId: false
 ---
 apiVersion: v1
 kind: Service

@@ -44,17 +44,22 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authenticator, err := newAuthenticator(r, am.config, am.logger)
 		if err != nil {
-			am.logger.Error(fmt.Sprintf("Error while authenticating request %s", r.URL), zap.Error(err))
+			am.logger.Error("Error while authenticating request", zap.String("url", r.URL.String()), zap.Error(err))
 			w.WriteHeader(401)
 			w.Write([]byte("Unauthorised\n"))
 			return
 		}
 
 		targetServer := am.config.Proxy.FindTargetServer(r.Host)
-		if targetServer != nil {
-			am.logger.Error("Target server not configured")
+		if targetServer == nil {
+			am.logger.Error("Target server not configured",
+				zap.String("host", r.Host),
+				zap.String("url", r.URL.String()),
+				zap.Error(err),
+			)
 			w.WriteHeader(404)
 			w.Write([]byte("Not found\n"))
+			return
 		}
 
 		am.logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))
@@ -77,7 +82,7 @@ func newAuthenticator(r *http.Request, config *config.Config, logger *zap.Logger
 	// OAuth token is favorite authentication mode
 	token := r.Header.Get("X-Id-Token")
 	if token != "" {
-		logger.Debug(fmt.Sprintf("OAuth Token = %s", token))
+		logger.Debug("Oauth authentication", zap.String("token", token))
 		return OAuthAuthenticator{
 			token:  token,
 			config: config,
