@@ -25,7 +25,7 @@ spec:
         {{- toYaml .Values.proxy.podSecurityContext | nindent 8 }}
       containers:
         - name: proxy
-          image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}"
+          image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           args:
             - "run"
