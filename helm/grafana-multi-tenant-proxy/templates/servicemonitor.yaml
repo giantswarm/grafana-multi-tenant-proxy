@@ -1,0 +1,15 @@
+{{- if .Values.proxy.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "proxy.fullname" $ }}
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "proxy.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+{{- end }}

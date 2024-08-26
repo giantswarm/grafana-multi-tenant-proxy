@@ -11,11 +11,10 @@ global:
 proxy:
   # -- Specifies whether the multi-tenant proxy should be enabled
   enabled: true
-  networkPolicy:
-    enabled: true
-    flavor: cilium
+
   # -- Number of replicas for the multi-tenant proxy
   replicas: 3
+
   autoscaling:
     # -- Enable autoscaling for the multi-tenant proxy
     enabled: true
@@ -27,15 +26,14 @@ proxy:
     targetCPUUtilizationPercentage: 90
     # -- Target memory utilisation percentage for the multi-tenant proxy
     targetMemoryUtilizationPercentage:
-  # -- See `kubectl explain deployment.spec.strategy` for more
-  # -- ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
   image:
     # -- Repository to get multi-tenant proxy image from.
     repository: giantswarm/grafana-multi-tenant-proxy
     # -- Overrides the image tag whose default is the chart's appVersion
     tag: null
+    # -- Overrides the image pull policy whose default is 'IfNotPresent'
     pullPolicy: IfNotPresent
-    pullSecrets: []
 
   # -- List of target servers to proxy
   targetServers: []
@@ -62,17 +60,22 @@ proxy:
       readOnlyRootFilesystem: true
       seccompProfile:
         type: RuntimeDefault
-  # Environment variables for the multi-tenant proxy
+
+  # -- Environment variables for the multi-tenant proxy
   # env: []
-  # -- Resource requests and limits for the write
+
+  # -- Resource requests and limits
   resources:
     limits:
       memory: 500Mi
     requests:
       memory: 50Mi
       cpu: 50m
-  # disable if credentials are provided externally
+
+  #  -- Disable if credentials are provided externally
   deployCredentials: true
+
+  # -- The credentials for the multi-tenant-proxy
   credentials: |-
     users:
       - username: Tenant1
@@ -81,6 +84,8 @@ proxy:
       - username: Tenant2
         password: 2tnaneT
         orgid: tenant-2
+
+  # -- The pod SecurityContext
   podSecurityContext:
     fsGroup: 10001
     runAsGroup: 10001
@@ -88,7 +93,8 @@ proxy:
     runAsUser: 10001
     seccompProfile:
       type: RuntimeDefault
-  # -- The SecurityContext for Loki containers
+
+  # -- The container SecurityContext for the multi-tenant-proxy container
   containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
@@ -97,8 +103,17 @@ proxy:
     readOnlyRootFilesystem: true
     seccompProfile:
       type: RuntimeDefault
+
+  networkPolicy:
+    # -- Specifies whether the multi-tenant proxy should be deployed with a network policy
+    enabled: true
+    # -- Specifies the flavor of network policy to use
+    flavor: cilium
+
+  # -- Default container port
   containerPort: 3501
   service:
+    ## -- Default service port
     port: 80
   ingress:
     # -- Specifies whether an ingress for the multi-tenant-proxy should be created

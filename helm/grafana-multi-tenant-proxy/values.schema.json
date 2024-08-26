@@ -154,9 +154,6 @@
                         "pullPolicy": {
                             "type": "string"
                         },
-                        "pullSecrets": {
-                            "type": "array"
-                        },
                         "repository": {
                             "type": "string"
                         },

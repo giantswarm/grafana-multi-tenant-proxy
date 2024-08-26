@@ -7,15 +7,21 @@ orbs:
 workflows:
   build:
     jobs:
-      ## TODO replace with proper go build and push to registries
+    - architect/go-build:
+          name: go-build
+          binary: grafana-multi-tenant-proxy
+          filters:
+            tags:
+              only: /^v.*/
+
     - architect/push-to-registries:
-        context: architect
-        name: push-to-registries
-        image: "giantswarm/grafana-multi-tenant-proxy"
-        dockerfile: "./Dockerfile-with-tests"
-        filters:
-          tags:
-            only: /^v.*/
+          context: architect
+          name: push-to-registries
+          requires:
+            - go-build
+          filters:
+            tags:
+              only: /^v.*/
 
     - architect/push-to-app-catalog:
           context: "architect"

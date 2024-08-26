@@ -1,27 +1,33 @@
-FROM golang:1.23-alpine as builder
+# Build the grafana-multi-tenant-proxy binary
+FROM golang:1.23 as builder
+ARG TARGETOS
+ARG TARGETARCH
 
-ARG VERSION=dev
-ARG COMMIT=none
-
-ENV GO111MODULE=on
-ENV CGO_ENABLED=0
-
-RUN apk add  -U --no-cache git ca-certificates && \
-    mkdir -p src/github.com/giantswarm/grafana-multi-tenant-proxy
-
-WORKDIR /go/src/github.com/giantswarm/grafana-multi-tenant-proxy
-
+WORKDIR /workspace
+# Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
-COPY cmd cmd
-COPY internal internal
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
+RUN go mod download
 
-RUN cd cmd/grafana-multi-tenant-proxy && \
-    go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}'"
+# Copy the go source
+COPY cmd/ cmd/
+COPY internal/ internal/
+COPY pkg/ pkg/
 
-FROM scratch
+# Build
+# the GOARCH has not a default value to allow the binary be built according to the host where the command
+# was called. For example, if we call make docker-build in a local env which has the Apple Silicon M1 SO
+# the docker BUILDPLATFORM arg will be linux/arm64 when for Apple x86 it will be linux/amd64. Therefore,
+# by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o grafana-multi-tenant-proxy cmd/grafana-multi-tenant-proxy/main.go
 
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/src/github.com/giantswarm/grafana-multi-tenant-proxy/cmd/grafana-multi-tenant-proxy/grafana-multi-tenant-proxy /grafana-multi-tenant-proxy
+# Use distroless as minimal base image to package the grafana-multi-tenant-proxy binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /workspace/grafana-multi-tenant-proxy .
+USER 65532:65532
 
-ENTRYPOINT [ "/grafana-multi-tenant-proxy" ]
+ENTRYPOINT ["/grafana-multi-tenant-proxy"]
