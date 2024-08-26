@@ -8,45 +8,101 @@ workflows:
   build:
     jobs:
     - architect/go-build:
-          name: go-build
-          binary: grafana-multi-tenant-proxy
-          path: ./cmd/grafana-multi-tenant-proxy
-          filters:
-            tags:
-              only: /^v.*/
+        name: go-build
+        binary: grafana-multi-tenant-proxy
+        path: ./cmd/grafana-multi-tenant-proxy
+        filters:
+          tags:
+            only: /^v.*/
 
     - architect/push-to-registries:
-          context: architect
-          name: push-to-registries
-          requires:
-            - go-build
-          filters:
-            tags:
-              only: /^v.*/
+        context: architect
+        name: push-to-registries
+        requires:
+          - go-build
+        filters:
+          tags:
+            only: /^v.*/
 
     - architect/push-to-app-catalog:
-          context: "architect"
-          executor: "app-build-suite"
-          name: push-to-app-catalog
-          app_catalog: "control-plane-catalog"
-          app_catalog_test: "control-plane-test-catalog"
-          chart: "grafana-multi-tenant-proxy"
-          requires:
-            - push-to-registries
-          filters:
-            tags:
-              only: /^v.*/
+        context: "architect"
+        executor: "app-build-suite"
+        name: push-to-app-catalog
+        app_catalog: "control-plane-catalog"
+        app_catalog_test: "control-plane-test-catalog"
+        chart: "grafana-multi-tenant-proxy"
+        requires:
+          - push-to-registries
+        filters:
+          tags:
+            only: /^v.*/
 
     - architect/push-to-app-collection:
-          context: "architect"
-          name: capa-app-collection
-          app_name: "grafana-multi-tenant-proxy"
-          app_namespace: "monitoring"
-          app_collection_repo: "capa-app-collection"
-          requires:
-            - push-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+        context: "architect"
+        name: aws-app-collection
+        app_name: "grafana-multi-tenant-proxy"
+        app_namespace: "monitoring"
+        app_collection_repo: "aws-app-collection"
+        requires:
+          - push-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
+
+    - architect/push-to-app-collection:
+        context: "architect"
+        name: capa-app-collection
+        app_name: "grafana-multi-tenant-proxy"
+        app_namespace: "monitoring"
+        app_collection_repo: "capa-app-collection"
+        requires:
+          - push-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
+
+    - architect/push-to-app-collection:
+        context: "architect"
+        name: capz-app-collection
+        app_name: "grafana-multi-tenant-proxy"
+        app_namespace: "monitoring"
+        app_collection_repo: "capz-app-collection"
+        requires:
+          - push-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
+
+    - architect/push-to-app-collection:
+        context: "architect"
+        name: vsphere-app-collection
+        app_name: "grafana-multi-tenant-proxy"
+        app_namespace: "monitoring"
+        app_collection_repo: "vsphere-app-collection"
+        requires:
+          - push-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
+
+    - architect/push-to-app-collection:
+        context: "architect"
+        name: cloud-director-app-collection
+        app_name: "grafana-multi-tenant-proxy"
+        app_namespace: "monitoring"
+        app_collection_repo: "cloud-director-app-collection"
+        requires:
+          - push-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
