@@ -32,6 +32,7 @@ spec:
             - "--auth-config=/etc/proxy/authn.yaml"
             - "--proxy-config=/etc/proxy/config.yaml"
             - "--log-level=WARN"
+            - "--port={{ .Values.proxy.containerPort }}"
           {{- with .Values.proxy.env }}
           env:
             {{- toYaml . | nindent 12 }}
@@ -51,7 +52,7 @@ spec:
           image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.configReloader.image.repository }}:{{ .Values.proxy.configReloader.image.tag }}"
           args:
             - "--volume-dir=/etc/proxy"
-            - "--webhook-url=http://localhost:3100/-/reload"
+            - "--webhook-url=http://localhost:{{ .Values.proxy.containerPort }}/-/reload"
             - "--web.listen-address=:9533"
           ports: 
           - name: reloader-web
