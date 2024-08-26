@@ -73,7 +73,7 @@ proxy:
       cpu: 50m
 
   #  -- Disable if credentials are provided externally
-  deployCredentials: true
+  deployCredentials: false
 
   # -- The credentials for the multi-tenant-proxy
   credentials: |-

@@ -71,7 +71,7 @@ func (p Proxy) newProxy(targetServer string) *httputil.ReverseProxy {
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(targetServerURL)
 			r.Out.Host = targetServerURL.Host
-			r.Out.Header.Set("X-Forwarded-Host", targetServerURL.Host)
+			r.Out.Header.Add("X-Forwarded-Host", targetServerURL.Host)
 
 			orgID := r.In.Context().Value(auth.OrgIDKey)
 			if orgID != "" {
