@@ -10,6 +10,7 @@ workflows:
     - architect/go-build:
           name: go-build
           binary: grafana-multi-tenant-proxy
+          path: ./cmd/grafana-multi-tenant-proxy
           filters:
             tags:
               only: /^v.*/
