@@ -43,7 +43,8 @@ func main() {
 					Name:  "port",
 					Usage: "Port to expose this proxy",
 					Value: 3501,
-				}, &cli.StringFlag{
+				},
+				&cli.StringFlag{
 					Name:  "log-level",
 					Usage: "Log level (DEBUG, INFO, WARN, ERROR, PANIC, FATAL)",
 					Value: "INFO",

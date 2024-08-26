@@ -20,7 +20,7 @@ const (
 
 // INTERFACE to handle different type of authentication
 type Authenticator interface {
-	Authenticate(r *http.Request) (bool, string)
+	Authenticate(r *http.Request, targetServer *config.TargetServer) (bool, string)
 	OnAuthenticationError(w http.ResponseWriter)
 }
 
@@ -30,10 +30,10 @@ type AuthenticationMiddleware struct {
 	logger  *zap.Logger
 }
 
-func NewAuthenticationMiddleware(config config.Config, logger *zap.Logger, handler http.HandlerFunc) *AuthenticationMiddleware {
+func NewAuthenticationMiddleware(config *config.Config, logger *zap.Logger, handler http.HandlerFunc) *AuthenticationMiddleware {
 	return &AuthenticationMiddleware{
 		handler: handler,
-		config:  &config,
+		config:  config,
 		logger:  logger,
 	}
 }
@@ -44,13 +44,26 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authenticator, err := newAuthenticator(r, am.config, am.logger)
 		if err != nil {
-			am.logger.Error(fmt.Sprintf("Error while authenticating request %s", r.URL), zap.Error(err))
+			am.logger.Error("Error while authenticating request", zap.String("url", r.URL.String()), zap.Error(err))
 			w.WriteHeader(401)
 			w.Write([]byte("Unauthorised\n"))
 			return
 		}
+
+		targetServer := am.config.Proxy.FindTargetServer(r.Host)
+		if targetServer == nil {
+			am.logger.Error("Target server not configured",
+				zap.String("host", r.Host),
+				zap.String("url", r.URL.String()),
+				zap.Error(err),
+			)
+			w.WriteHeader(404)
+			w.Write([]byte("Not found\n"))
+			return
+		}
+
 		am.logger.Debug(fmt.Sprintf("Authentication mode: %T", authenticator))
-		ok, orgID := authenticator.Authenticate(r)
+		ok, orgID := authenticator.Authenticate(r, targetServer)
 		if !ok {
 			authenticator.OnAuthenticationError(w)
 			return
@@ -60,8 +73,8 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 	}
 }
 
-func (am AuthenticationMiddleware) ApplyConfig(config config.Config) {
-	*am.config = config
+func (am AuthenticationMiddleware) ApplyConfig(config *config.Config) {
+	*am.config = *config
 }
 
 // newAuthenticator returns the authentication mode used by the request and its credentials
@@ -69,7 +82,6 @@ func newAuthenticator(r *http.Request, config *config.Config, logger *zap.Logger
 	// OAuth token is favorite authentication mode
 	token := r.Header.Get("X-Id-Token")
 	if token != "" {
-		logger.Debug(fmt.Sprintf("OAuth Token = %s", token))
 		return OAuthAuthenticator{
 			token:  token,
 			config: config,

@@ -13,6 +13,18 @@ import (
 )
 
 func TestOAuthAuthenticator_Authenticate(t *testing.T) {
+	expectedTargetServer := config.TargetServer{
+		Name:      "example",
+		Host:      "http://example.com",
+		Target:    "http://example-target.com",
+		KeepOrgID: false,
+	}
+	unexpectedTargetServer := config.TargetServer{
+		Name:      "example2",
+		Host:      "http://example2.com",
+		Target:    "http://example-target.com",
+		KeepOrgID: true,
+	}
 	config := &config.Config{
 		Authentication: config.AuthenticationConfig{
 			Users: []config.User{
@@ -29,7 +41,10 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 			},
 		},
 		Proxy: config.ProxyConfig{
-			KeepOrgID: false,
+			TargetServers: []config.TargetServer{
+				expectedTargetServer,
+				unexpectedTargetServer,
+			},
 		},
 	}
 
@@ -70,7 +85,7 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 				return nil
 			}
 
-			result, orgID := auth.Authenticate(&http.Request{})
+			result, orgID := auth.Authenticate(&http.Request{Host: expectedTargetServer.Host}, &expectedTargetServer)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectedOrg, orgID)
