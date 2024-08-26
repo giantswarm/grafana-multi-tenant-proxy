@@ -1,0 +1,19 @@
+{{- if .Values.proxy.enabled }}
+{{- if and (.Values.proxy.networkPolicy.enabled) (eq .Values.proxy.networkPolicy.flavor "cilium") }}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "proxy.fullname" $ }}
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+spec:
+  endpointSelector:
+    matchLabels:
+      {{- include "proxy.selectorLabels" . | nindent 6 }}
+  ingress:
+  - toPorts:
+    - ports: 
+      - port: http
+        protocol: TCP
+{{- end }}
+{{- end }}

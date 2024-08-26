@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add helm chart to be able to deploy the proxy as a standalone component
+
 ### Changed
 
 - [breaking] Refactor configuration so that `target server` or `keep-org-id` are now configured via config instead of via a cli flag.

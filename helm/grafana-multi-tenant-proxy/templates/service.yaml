@@ -1,0 +1,16 @@
+{{- if .Values.proxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "proxy.fullname" $ }}
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ .Values.proxy.service.port }}
+    protocol: TCP
+    name: http
+    targetPort: http
+  selector:
+    {{- include "proxy.selectorLabels" . | nindent 4 }}
+{{- end }}

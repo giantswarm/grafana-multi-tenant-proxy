@@ -1,0 +1,119 @@
+# -- Overrides the chart's name
+nameOverride: null
+# -- Overrides the chart's computed fullname
+fullnameOverride: null
+
+global:
+  image:
+    # -- Overrides the Docker registry globally for all images
+    registry: gsoci.azurecr.io
+
+proxy:
+  # -- Specifies whether the multi-tenant proxy should be enabled
+  enabled: true
+  networkPolicy:
+    enabled: true
+    flavor: cilium
+  # -- Number of replicas for the multi-tenant proxy
+  replicas: 3
+  autoscaling:
+    # -- Enable autoscaling for the multi-tenant proxy
+    enabled: true
+    # -- Minimum autoscaling replicas for the multi-tenant proxy
+    minReplicas: 2
+    # -- Maximum autoscaling replicas for the multi-tenant proxy
+    maxReplicas: 4
+    # -- Target CPU utilisation percentage for the multi-tenant proxy
+    targetCPUUtilizationPercentage: 90
+    # -- Target memory utilisation percentage for the multi-tenant proxy
+    targetMemoryUtilizationPercentage:
+  # -- See `kubectl explain deployment.spec.strategy` for more
+  # -- ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  image:
+    # -- Repository to get multi-tenant proxy image from.
+    repository: giantswarm/grafana-multi-tenant-proxy
+    # -- Overrides the image tag whose default is the chart's appVersion
+    tag: null
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+
+  # -- List of target servers to proxy
+  targetServers: []
+
+  configReloader:
+    image:
+      # -- Repository to get config reloader image from.
+      repository: giantswarm/configmap-reload
+      # -- Tag of image to use for config reloading.
+      tag: v0.13.1
+
+    # -- Resource requests and limits to apply to the config reloader containers.
+    resources:
+      requests:
+        cpu: "1m"
+        memory: "5Mi"
+
+    # -- Security context to apply to the config reloader containers.
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: RuntimeDefault
+  # Environment variables for the multi-tenant proxy
+  # env: []
+  # -- Resource requests and limits for the write
+  resources:
+    limits:
+      memory: 500Mi
+    requests:
+      memory: 50Mi
+      cpu: 50m
+  # disable if credentials are provided externally
+  deployCredentials: true
+  credentials: |-
+    users:
+      - username: Tenant1
+        password: 1tnaneT
+        orgid: tenant-1
+      - username: Tenant2
+        password: 2tnaneT
+        orgid: tenant-2
+  podSecurityContext:
+    fsGroup: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  # -- The SecurityContext for Loki containers
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerPort: 3501
+  service:
+    port: 80
+  ingress:
+    # -- Specifies whether an ingress for the multi-tenant-proxy should be created
+    enabled: false
+    # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+    ingressClassName: ""
+    # -- Hosts configuration for the multi-tenant-proxy ingress, passed through the `tpl` function to allow templating
+    hosts:
+      - host: multi-tenant-proxy.loki.example.com
+        paths:
+          - path: /
+            # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
+            # pathType: Prefix
+    # -- TLS configuration for the gateway ingress. Hosts passed through the `tpl` function to allow templating
+    tls:
+      - secretName: loki-multi-tenant-proxy-tls
+        hosts:
+          - write.multi-tenant-proxy.loki.example.com

@@ -1,0 +1,80 @@
+{{- if .Values.proxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "proxy.fullname" $ }}
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.proxy.autoscaling.enabled }}
+  replicas: {{ .Values.proxy.replicas }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "proxy.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.proxy.serviceAccount.name }}
+      {{- with .Values.proxy.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.proxy.podSecurityContext | nindent 8 }}
+      containers:
+        - name: proxy
+          image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}"
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
+          args:
+            - "run"
+            - "--auth-config=/etc/proxy/authn.yaml"
+            - "--proxy-config=/etc/proxy/config.yaml"
+            - "--log-level=WARN"
+          {{- with .Values.proxy.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.proxy.containerPort }}
+              protocol: TCP
+          securityContext:
+            {{- toYaml .Values.proxy.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.proxy.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/proxy
+        - name: config-reloader
+          image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.configReloader.image.repository }}:{{ .Values.proxy.configReloader.image.tag }}"
+          args:
+            - "--volume-dir=/etc/proxy"
+            - "--webhook-url=http://localhost:3100/-/reload"
+            - "--web.listen-address=:9533"
+          ports: 
+          - name: reloader-web
+            containerPort: 9533
+            protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/proxy
+          {{- with .Values.proxy.configReloader.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.proxy.configReloader.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "proxy.fullname" $ }}-auth-config
+              - configMap:
+                  name: {{ include "proxy.fullname" $ }}-config
+{{- end }}
