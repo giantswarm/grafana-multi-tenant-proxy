@@ -32,7 +32,7 @@ stringData:
     - name: "loki-write"
       host: "http://write.loki.giantswarm.io"
       target: "http://loki-gateway.grafana.svc.cluster.local:3100"
-      keepOrgId: false
+      keepOrgId: true
 ---
 apiVersion: v1
 kind: ConfigMap
