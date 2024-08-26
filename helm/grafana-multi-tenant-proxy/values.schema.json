@@ -165,6 +165,9 @@
                 "ingress": {
                     "type": "object",
                     "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
@@ -192,6 +195,9 @@
                         },
                         "ingressClassName": {
                             "type": "string"
+                        },
+                        "labels": {
+                            "type": "object"
                         },
                         "tls": {
                             "type": "array",

@@ -120,6 +120,10 @@ proxy:
     enabled: false
     # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
     ingressClassName: ""
+    # -- Annotations for the gateway ingress
+    annotations: {}
+    # -- Labels for the gateway ingress
+    labels: {}
     # -- Hosts configuration for the multi-tenant-proxy ingress, passed through the `tpl` function to allow templating
     hosts:
       - host: multi-tenant-proxy.loki.example.com

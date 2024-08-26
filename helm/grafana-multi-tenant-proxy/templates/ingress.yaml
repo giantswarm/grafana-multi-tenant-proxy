@@ -6,6 +6,13 @@ metadata:
   name: {{ include "proxy.fullname" $ }}
   labels:
     {{- include "proxy.labels" . | nindent 4 }}
+    {{- range $labelKey, $labelValue := .Values.proxy.ingress.labels }}
+    {{ $labelKey }}: {{ $labelValue | toYaml }}
+    {{- end }}
+  {{- with .Values.proxy.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.proxy.ingress.ingressClassName }}
   {{- if .Values.proxy.ingress.tls }}
