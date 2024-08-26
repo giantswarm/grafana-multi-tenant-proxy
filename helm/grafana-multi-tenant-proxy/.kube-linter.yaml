@@ -1,0 +1,5 @@
+checks:	
+  addAllBuiltIn: true	
+  exclude:	
+  - "unset-memory-requirements"
+  - "unset-cpu-requirements"
