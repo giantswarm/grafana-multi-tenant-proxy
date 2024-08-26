@@ -18,7 +18,7 @@ type Proxy struct {
 	errorLogger *log.Logger
 }
 
-func NewProxy(config config.Config, logger *zap.Logger, errorLogger *log.Logger) Proxy {
+func NewProxy(config *config.Config, logger *zap.Logger, errorLogger *log.Logger) Proxy {
 	return Proxy{
 		proxies:     make(map[string]*httputil.ReverseProxy),
 		proxyConfig: &config.Proxy,
@@ -27,7 +27,7 @@ func NewProxy(config config.Config, logger *zap.Logger, errorLogger *log.Logger)
 	}
 }
 
-func (p Proxy) ApplyConfig(config config.Config) {
+func (p Proxy) ApplyConfig(config *config.Config) {
 	*p.proxyConfig = config.Proxy
 	// Clear the existing proxies
 	for k := range p.proxies {

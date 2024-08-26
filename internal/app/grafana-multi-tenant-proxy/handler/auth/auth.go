@@ -30,10 +30,10 @@ type AuthenticationMiddleware struct {
 	logger  *zap.Logger
 }
 
-func NewAuthenticationMiddleware(config config.Config, logger *zap.Logger, handler http.HandlerFunc) *AuthenticationMiddleware {
+func NewAuthenticationMiddleware(config *config.Config, logger *zap.Logger, handler http.HandlerFunc) *AuthenticationMiddleware {
 	return &AuthenticationMiddleware{
 		handler: handler,
-		config:  &config,
+		config:  config,
 		logger:  logger,
 	}
 }
@@ -73,8 +73,8 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 	}
 }
 
-func (am AuthenticationMiddleware) ApplyConfig(config config.Config) {
-	*am.config = config
+func (am AuthenticationMiddleware) ApplyConfig(config *config.Config) {
+	*am.config = *config
 }
 
 // newAuthenticator returns the authentication mode used by the request and its credentials
@@ -82,7 +82,6 @@ func newAuthenticator(r *http.Request, config *config.Config, logger *zap.Logger
 	// OAuth token is favorite authentication mode
 	token := r.Header.Get("X-Id-Token")
 	if token != "" {
-		logger.Debug("Oauth authentication", zap.String("token", token))
 		return OAuthAuthenticator{
 			token:  token,
 			config: config,

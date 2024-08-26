@@ -5,16 +5,16 @@ type Config struct {
 	Authentication AuthenticationConfig
 }
 
-func ReadConfigFiles(proxyConfigLocation string, authConfigLocation string) (Config, error) {
+func ReadConfigFiles(proxyConfigLocation string, authConfigLocation string) (*Config, error) {
 	proxyConfig, err := readProxyConfigFile(proxyConfigLocation)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	authConfig, err := readAuthConfigFile(authConfigLocation)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
-	return Config{
+	return &Config{
 		Proxy:          *proxyConfig,
 		Authentication: *authConfig,
 	}, nil
