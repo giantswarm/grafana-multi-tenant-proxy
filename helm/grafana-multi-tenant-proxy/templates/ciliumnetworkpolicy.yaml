@@ -1,11 +1,11 @@
-{{- if .Values.proxy.enabled }}
-{{- if and (.Values.proxy.networkPolicy.enabled) (eq .Values.proxy.networkPolicy.flavor "cilium") }}
+{{- if and (.Values.networkPolicy.enabled) (eq .Values.networkPolicy.flavor "cilium") }}
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: {{ include "proxy.fullname" $ }}
   labels:
     {{- include "proxy.labels" . | nindent 4 }}
+  name: {{ include "proxy.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
 spec:
   endpointSelector:
     matchLabels:
@@ -15,5 +15,4 @@ spec:
     - ports: 
       - port: http
         protocol: TCP
-{{- end }}
 {{- end }}

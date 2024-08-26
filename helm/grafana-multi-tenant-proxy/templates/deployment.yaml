@@ -1,10 +1,10 @@
-{{- if .Values.proxy.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "proxy.fullname" $ }}
   labels:
     {{- include "proxy.labels" . | nindent 4 }}
+  name: {{ include "proxy.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
 spec:
 {{- if not .Values.proxy.autoscaling.enabled }}
   replicas: {{ .Values.proxy.replicas }}
@@ -17,12 +17,8 @@ spec:
       labels:
         {{- include "proxy.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.proxy.image.pullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       securityContext:
-        {{- toYaml .Values.proxy.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: proxy
           image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag | default .Chart.AppVersion }}"
@@ -49,7 +45,7 @@ spec:
             - name: config
               mountPath: /etc/proxy
         - name: config-reloader
-          image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.configReloader.image.repository }}:{{ .Values.proxy.configReloader.image.tag }}"
+          image: "{{ .Values.global.image.registry }}/{{ .Values.configReloader.image.repository }}:{{ .Values.configReloader.image.tag }}"
           args:
             - "--volume-dir=/etc/proxy"
             - "--webhook-url=http://localhost:{{ .Values.proxy.containerPort }}/-/reload"
@@ -61,11 +57,11 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/proxy
-          {{- with .Values.proxy.configReloader.resources }}
+          {{- with .Values.configReloader.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.proxy.configReloader.containerSecurityContext }}
+          {{- with .Values.configReloader.containerSecurityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -77,4 +73,3 @@ spec:
                   name: {{ include "proxy.fullname" $ }}-auth-config
               - configMap:
                   name: {{ include "proxy.fullname" $ }}-config
-{{- end }}

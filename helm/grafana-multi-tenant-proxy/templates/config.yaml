@@ -1,11 +1,10 @@
-{{- if .Values.proxy.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "proxy.fullname" $ }}-config
   labels:
     {{- include "proxy.labels" . | nindent 4 }}
+  name: {{ include "proxy.fullname" $ }}-config
+  namespace: {{ .Release.Namespace }}
 data:
   config.yaml: |
     targetServers: {{- tpl (toYaml .Values.proxy.targetServers) . | nindent 6 }}
-{{- end }}

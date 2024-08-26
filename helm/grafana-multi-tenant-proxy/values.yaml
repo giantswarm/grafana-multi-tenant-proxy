@@ -9,9 +9,6 @@ global:
     registry: gsoci.azurecr.io
 
 proxy:
-  # -- Specifies whether the multi-tenant proxy should be enabled
-  enabled: true
-
   # -- Number of replicas for the multi-tenant proxy
   replicas: 3
 
@@ -38,29 +35,6 @@ proxy:
   # -- List of target servers to proxy
   targetServers: []
 
-  configReloader:
-    image:
-      # -- Repository to get config reloader image from.
-      repository: giantswarm/configmap-reload
-      # -- Tag of image to use for config reloading.
-      tag: v0.13.1
-
-    # -- Resource requests and limits to apply to the config reloader containers.
-    resources:
-      requests:
-        cpu: "1m"
-        memory: "5Mi"
-
-    # -- Security context to apply to the config reloader containers.
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      readOnlyRootFilesystem: true
-      seccompProfile:
-        type: RuntimeDefault
-
   # -- Environment variables for the multi-tenant proxy
   # env: []
 
@@ -85,15 +59,6 @@ proxy:
         password: 2tnaneT
         orgid: tenant-2
 
-  # -- The pod SecurityContext
-  podSecurityContext:
-    fsGroup: 10001
-    runAsGroup: 10001
-    runAsNonRoot: true
-    runAsUser: 10001
-    seccompProfile:
-      type: RuntimeDefault
-
   # -- The container SecurityContext for the multi-tenant-proxy container
   containerSecurityContext:
     allowPrivilegeEscalation: false
@@ -104,35 +69,72 @@ proxy:
     seccompProfile:
       type: RuntimeDefault
 
-  networkPolicy:
-    # -- Specifies whether the multi-tenant proxy should be deployed with a network policy
-    enabled: true
-    # -- Specifies the flavor of network policy to use
-    flavor: cilium
-
   # -- Default container port
   containerPort: 3501
-  service:
-    ## -- Default service port
-    port: 80
-  ingress:
-    # -- Specifies whether an ingress for the multi-tenant-proxy should be created
-    enabled: false
-    # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
-    ingressClassName: ""
-    # -- Annotations for the gateway ingress
-    annotations: {}
-    # -- Labels for the gateway ingress
-    labels: {}
-    # -- Hosts configuration for the multi-tenant-proxy ingress, passed through the `tpl` function to allow templating
-    hosts:
-      - host: multi-tenant-proxy.loki.example.com
-        paths:
-          - path: /
-            # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
-            # pathType: Prefix
-    # -- TLS configuration for the gateway ingress. Hosts passed through the `tpl` function to allow templating
-    tls:
-      - secretName: loki-multi-tenant-proxy-tls
-        hosts:
-          - write.multi-tenant-proxy.loki.example.com
+
+configReloader:
+  image:
+    # -- Repository to get config reloader image from.
+    repository: giantswarm/configmap-reload
+    # -- Tag of image to use for config reloading.
+    tag: v0.13.1
+
+  # -- Resource requests and limits to apply to the config reloader containers.
+  resources:
+    requests:
+      cpu: "1m"
+      memory: "5Mi"
+
+  # -- Security context to apply to the config reloader containers.
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
+
+# -- The pod SecurityContext
+podSecurityContext:
+  fsGroup: 10001
+  runAsGroup: 10001
+  runAsNonRoot: true
+  runAsUser: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+service:
+  ## -- Default service port
+  port: 80
+
+ingress:
+  # -- Specifies whether an ingress for the multi-tenant-proxy should be created
+  enabled: false
+  # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+  ingressClassName: ""
+  # -- Annotations for the gateway ingress
+  annotations: {}
+  # -- Labels for the gateway ingress
+  labels: {}
+  # -- Hosts configuration for the multi-tenant-proxy ingress, passed through the `tpl` function to allow templating
+  hosts:
+    - host: multi-tenant-proxy.loki.example.com
+      paths:
+        - path: /
+          # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
+          # pathType: Prefix
+  # -- TLS configuration for the gateway ingress. Hosts passed through the `tpl` function to allow templating
+  tls:
+    - secretName: loki-multi-tenant-proxy-tls
+      hosts:
+        - write.multi-tenant-proxy.loki.example.com
+
+networkPolicy:
+  # -- Specifies whether the multi-tenant proxy should be deployed with a network policy
+  enabled: true
+  # -- Specifies the flavor of network policy to use
+  flavor: cilium
+
+monitoring:
+  enabled: true

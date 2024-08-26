@@ -1,23 +1,23 @@
-{{- if .Values.proxy.enabled }}
-{{- if .Values.proxy.ingress.enabled }}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "proxy.fullname" $ }}
-  labels:
-    {{- include "proxy.labels" . | nindent 4 }}
-    {{- range $labelKey, $labelValue := .Values.proxy.ingress.labels }}
-    {{ $labelKey }}: {{ $labelValue | toYaml }}
-    {{- end }}
-  {{- with .Values.proxy.ingress.annotations }}
+  {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+    {{- range $labelKey, $labelValue := .Values.ingress.labels }}
+    {{ $labelKey }}: {{ $labelValue | toYaml }}
+    {{- end }}
+  name: {{ include "proxy.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  ingressClassName: {{ .Values.proxy.ingress.ingressClassName }}
-  {{- if .Values.proxy.ingress.tls }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.proxy.ingress.tls }}
+    {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ tpl . $ | quote }}
@@ -28,7 +28,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.proxy.ingress.hosts }}
+    {{- range .Values.ingress.hosts }}
     - host: {{ tpl .host $ | quote }}
       http:
         paths:
@@ -39,8 +39,7 @@ spec:
               service:
                 name: {{ include "proxy.fullname" $ }}
                 port:
-                  number: {{ $.Values.proxy.service.port }}
+                  number: {{ $.Values.service.port }}
           {{- end }}
     {{- end }}
-{{- end }}
 {{- end }}

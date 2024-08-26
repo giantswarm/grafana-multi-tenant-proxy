@@ -2,6 +2,68 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
+        "configReloader": {
+            "type": "object",
+            "properties": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "type": "object",
+                            "properties": {
+                                "drop": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean"
+                        },
+                        "seccompProfile": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "fullnameOverride": {
             "type": "null"
         },
@@ -18,8 +80,108 @@
                 }
             }
         },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ingressClassName": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object"
+                },
+                "tls": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "hosts": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "secretName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "monitoring": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
         "nameOverride": {
             "type": "null"
+        },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "flavor": {
+                    "type": "string"
+                }
+            }
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                },
+                "runAsGroup": {
+                    "type": "integer"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         },
         "proxy": {
             "type": "object",
@@ -41,68 +203,6 @@
                         },
                         "targetMemoryUtilizationPercentage": {
                             "type": "null"
-                        }
-                    }
-                },
-                "configReloader": {
-                    "type": "object",
-                    "properties": {
-                        "containerSecurityContext": {
-                            "type": "object",
-                            "properties": {
-                                "allowPrivilegeEscalation": {
-                                    "type": "boolean"
-                                },
-                                "capabilities": {
-                                    "type": "object",
-                                    "properties": {
-                                        "drop": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                },
-                                "readOnlyRootFilesystem": {
-                                    "type": "boolean"
-                                },
-                                "seccompProfile": {
-                                    "type": "object",
-                                    "properties": {
-                                        "type": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "image": {
-                            "type": "object",
-                            "properties": {
-                                "repository": {
-                                    "type": "string"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "resources": {
-                            "type": "object",
-                            "properties": {
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 },
@@ -145,9 +245,6 @@
                 "deployCredentials": {
                     "type": "boolean"
                 },
-                "enabled": {
-                    "type": "boolean"
-                },
                 "image": {
                     "type": "object",
                     "properties": {
@@ -159,98 +256,6 @@
                         },
                         "tag": {
                             "type": "null"
-                        }
-                    }
-                },
-                "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "annotations": {
-                            "type": "object"
-                        },
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "hosts": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "host": {
-                                        "type": "string"
-                                    },
-                                    "paths": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "path": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "ingressClassName": {
-                            "type": "string"
-                        },
-                        "labels": {
-                            "type": "object"
-                        },
-                        "tls": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "hosts": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "secretName": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "networkPolicy": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "flavor": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "podSecurityContext": {
-                    "type": "object",
-                    "properties": {
-                        "fsGroup": {
-                            "type": "integer"
-                        },
-                        "runAsGroup": {
-                            "type": "integer"
-                        },
-                        "runAsNonRoot": {
-                            "type": "boolean"
-                        },
-                        "runAsUser": {
-                            "type": "integer"
-                        },
-                        "seccompProfile": {
-                            "type": "object",
-                            "properties": {
-                                "type": {
-                                    "type": "string"
-                                }
-                            }
                         }
                     }
                 },
@@ -281,16 +286,16 @@
                         }
                     }
                 },
-                "service": {
-                    "type": "object",
-                    "properties": {
-                        "port": {
-                            "type": "integer"
-                        }
-                    }
-                },
                 "targetServers": {
                     "type": "array"
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "integer"
                 }
             }
         }

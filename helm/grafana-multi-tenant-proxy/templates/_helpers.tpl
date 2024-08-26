@@ -40,7 +40,6 @@ helm.sh/chart: {{ include "proxy.chart" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
-app.kubernetes.io/component: multi-tenant-proxy
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 giantswarm.io/service-type: "managed"
 application.giantswarm.io/team: {{ index .Chart.Annotations "application.giantswarm.io/team" | default "atlas" | quote }}

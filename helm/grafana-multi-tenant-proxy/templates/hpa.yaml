@@ -1,4 +1,3 @@
-{{- if .Values.proxy.enabled }}
 {{- $autoscalingv2 := .Capabilities.APIVersions.Has "autoscaling/v2" -}}
 {{- if .Values.proxy.autoscaling.enabled }}
 {{- if $autoscalingv2 }}
@@ -8,9 +7,10 @@ apiVersion: autoscaling/v2beta1
 {{- end }}
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "proxy.fullname" $ }}
   labels:
     {{- include "proxy.labels" . | nindent 4 }}
+  name: {{ include "proxy.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -43,5 +43,4 @@ spec:
         targetAverageUtilization: {{ . }}
         {{- end }}
   {{- end }}
-{{- end }}
 {{- end }}
