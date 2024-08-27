@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 // #nosec G101
@@ -97,14 +97,13 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 }
 
 func TestOAuthAuthenticator_extractPayload(t *testing.T) {
-	token := oauthToken
 	expectedPayload := Payload{
 		Issuer:   "https://dex.golem.gaws.gigantic.io",
 		Audience: "2qRgNb5qQBk3QqWxI1WLgB5zTQ1M4eB+",
 	}
 
 	auth := OAuthAuthenticator{
-		token: token,
+		token: oauthToken,
 	}
 
 	payload, err := extractPayload(auth.token)

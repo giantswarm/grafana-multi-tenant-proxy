@@ -58,7 +58,7 @@ type User struct {
 }
 ```
 
-An example is available at [configs/multiple.user.yaml](configs/multiple.user.yaml) file:
+Here is an example of a valid multi-user configuration:
 
 ```yaml
 users:
