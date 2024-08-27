@@ -1,16 +1,16 @@
-package pkg
+package config
 
 import (
 	"reflect"
 	"testing"
 )
 
-func TestParseConfig(t *testing.T) {
-	configInvalidLocation := "../../configs/no.config.yaml"
-	configInvalidConfigFileLocation := "../../configs/bad.yaml"
-	configSampleLocation := "../../configs/sample.yaml"
-	configMultipleUserLocation := "../../configs/multiple.user.yaml"
-	expectedSampleAuth := Authn{
+func TestReadAuthConfigFile(t *testing.T) {
+	configInvalidLocation := "../../../../configs/no.config.yaml"
+	configInvalidConfigFileLocation := "../../../../configs/bad.yaml"
+	configSampleLocation := "../../../../configs/sample.yaml"
+	configMultipleUserLocation := "../../../../configs/multiple.user.yaml"
+	expectedSampleAuth := AuthenticationConfig{
 		[]User{
 			{
 				"Grafana",
@@ -18,9 +18,8 @@ func TestParseConfig(t *testing.T) {
 				"tenant-1",
 			},
 		},
-		false,
 	}
-	expectedMultipleUserAuth := Authn{
+	expectedMultipleUserAuth := AuthenticationConfig{
 		[]User{
 			{
 				"User-a",
@@ -33,42 +32,41 @@ func TestParseConfig(t *testing.T) {
 				"tenant-b",
 			},
 		},
-		false,
 	}
 	type args struct {
-		location *string
+		location string
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    *Authn
+		want    *AuthenticationConfig
 		wantErr bool
 	}{
 		{
 			"Basic",
 			args{
-				&configSampleLocation,
+				configSampleLocation,
 			},
 			&expectedSampleAuth,
 			false,
 		}, {
 			"Multiples users",
 			args{
-				&configMultipleUserLocation,
+				configMultipleUserLocation,
 			},
 			&expectedMultipleUserAuth,
 			false,
 		}, {
 			"Invalid location",
 			args{
-				&configInvalidLocation,
+				configInvalidLocation,
 			},
 			nil,
 			true,
 		}, {
 			"Invalid yaml file",
 			args{
-				&configInvalidConfigFileLocation,
+				configInvalidConfigFileLocation,
 			},
 			nil,
 			true,
@@ -76,13 +74,13 @@ func TestParseConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseConfig(tt.args.location)
+			got, err := readAuthConfigFile(tt.args.location)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseConfig() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("readAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseConfig() = %v, want %v", got, tt.want)
+				t.Errorf("readAuthConfigFile() = %v, want %v", got, tt.want)
 			}
 		})
 	}

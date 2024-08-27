@@ -109,7 +109,7 @@ spec:
         runAsUser: 10001
       containers:
         - name: loki
-          image: "grafana/loki:3.1.0"
+          image: "grafana/loki:3.1.1"
           imagePullPolicy: Always
           args:
             - "-config.file=/etc/loki/loki.yaml"
@@ -118,7 +118,6 @@ spec:
               mountPath: /etc/loki
             - name: storage
               mountPath: "/data"
-              subPath: 
           ports:
             - name: http-metrics
               containerPort: 3100

@@ -6,26 +6,46 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 )
 
 func TestOAuthAuthenticator_Authenticate(t *testing.T) {
-	authConfig := &pkg.Authn{
-		Users: []pkg.User{
-			{
-				Username: "read",
-				Password: "passread",
-				OrgID:    "giantswarm|default|wc-1|wc-2",
-			},
-			{
-				Username: "user1",
-				Password: "pass1",
-				OrgID:    "org1",
+	expectedTargetServer := config.TargetServer{
+		Name:      "example",
+		Host:      "http://example.com",
+		Target:    "http://example-target.com",
+		KeepOrgID: false,
+	}
+	unexpectedTargetServer := config.TargetServer{
+		Name:      "example2",
+		Host:      "http://example2.com",
+		Target:    "http://example-target.com",
+		KeepOrgID: true,
+	}
+	config := &config.Config{
+		Authentication: config.AuthenticationConfig{
+			Users: []config.User{
+				{
+					Username: "read",
+					Password: "passread",
+					OrgID:    "giantswarm|default|wc-1|wc-2",
+				},
+				{
+					Username: "user1",
+					Password: "pass1",
+					OrgID:    "org1",
+				},
 			},
 		},
-		KeepOrgID: false,
+		Proxy: config.ProxyConfig{
+			TargetServers: []config.TargetServer{
+				expectedTargetServer,
+				unexpectedTargetServer,
+			},
+		},
 	}
 
 	logger := zap.NewNop()
@@ -56,16 +76,16 @@ func TestOAuthAuthenticator_Authenticate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			auth := OAuthAuthenticator{
-				token:      tt.token,
-				authConfig: authConfig,
-				logger:     logger,
+				token:  tt.token,
+				config: config,
+				logger: logger,
 			}
 
 			validateFunc = func(token string, payload Payload, ctx context.Context) error {
 				return nil
 			}
 
-			result, orgID := auth.Authenticate(&http.Request{})
+			result, orgID := auth.Authenticate(&http.Request{Host: expectedTargetServer.Host}, &expectedTargetServer)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectedOrg, orgID)

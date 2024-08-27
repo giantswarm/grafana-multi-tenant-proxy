@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add basic http metrics.
 
+### Changed
+
+- [breaking] Refactor configuration so that `target server` or `keep-org-id` are now configured via config instead of via a cli flag.
+
 ## [0.5.0] - 2024-02-23
 
 ### Changed
