@@ -7,12 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- Add helm chart to be able to deploy the proxy as a standalone component
-
 ### Changed
 
+- Move config package from `internal` to public packages so it can be imported in our operators.
+- Use giantswarm CI tooling to build and improve error handling.
 - [breaking] Refactor configuration so that `target server` or `keep-org-id` are now configured via config instead of via a cli flag.
 
 ## [0.5.0] - 2024-02-23
