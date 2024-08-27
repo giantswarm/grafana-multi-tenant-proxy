@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func TestReadAuthConfigFile(t *testing.T) {
-	configInvalidLocation := "../../configs/no.config.yaml"
-	configInvalidConfigFileLocation := "../../configs/bad.yaml"
-	configSampleLocation := "../../configs/sample.yaml"
-	configMultipleUserLocation := "../../configs/multiple.user.yaml"
-	expectedSampleAuth := AuthenticationConfig{
+var (
+	missingConfigLocation    = "./testdata/missing.yaml"
+	invalidConfigLocation    = "./testdata/invalid.yaml"
+	singleUserConfigLocation = "./testdata/single-user.yaml"
+	multiUserConfigLocation  = "./testdata/multi-user.yaml"
+	expectedSingleUserConfig = AuthenticationConfig{
 		[]User{
 			{
 				"Grafana",
@@ -19,7 +19,7 @@ func TestReadAuthConfigFile(t *testing.T) {
 			},
 		},
 	}
-	expectedMultipleUserAuth := AuthenticationConfig{
+	expectedMultipleUserAuth = AuthenticationConfig{
 		[]User{
 			{
 				"User-a",
@@ -33,48 +33,40 @@ func TestReadAuthConfigFile(t *testing.T) {
 			},
 		},
 	}
-	type args struct {
-		location string
-	}
+)
+
+func TestReadAuthConfigFile(t *testing.T) {
 	tests := []struct {
-		name    string
-		args    args
-		want    *AuthenticationConfig
-		wantErr bool
+		name         string
+		fileLocation string
+		want         *AuthenticationConfig
+		wantErr      bool
 	}{
 		{
-			"Basic",
-			args{
-				configSampleLocation,
-			},
-			&expectedSampleAuth,
+			"Single user",
+			singleUserConfigLocation,
+			&expectedSingleUserConfig,
 			false,
 		}, {
 			"Multiples users",
-			args{
-				configMultipleUserLocation,
-			},
+			multiUserConfigLocation,
 			&expectedMultipleUserAuth,
 			false,
 		}, {
-			"Invalid location",
-			args{
-				configInvalidLocation,
-			},
+			"Missing config",
+			missingConfigLocation,
 			nil,
 			true,
 		}, {
-			"Invalid yaml file",
-			args{
-				configInvalidConfigFileLocation,
-			},
+			"Invalid config",
+			invalidConfigLocation,
 			nil,
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := readAuthConfigFile(tt.args.location)
+			got, err := readAuthConfigFile(tt.fileLocation)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("readAuthConfigFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
