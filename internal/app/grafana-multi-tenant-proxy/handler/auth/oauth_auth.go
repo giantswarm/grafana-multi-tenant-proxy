@@ -14,7 +14,7 @@ import (
 	"github.com/coreos/go-oidc"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 const (
@@ -67,7 +67,10 @@ func (a OAuthAuthenticator) Authenticate(r *http.Request, targetServer *config.T
 func (a OAuthAuthenticator) OnAuthenticationError(w http.ResponseWriter) {
 	a.logger.Error("OAuth authentication failed")
 	w.WriteHeader(401)
-	w.Write([]byte("Unauthorised\n"))
+	_, err := w.Write([]byte("Unauthorised\n"))
+	if err != nil {
+		a.logger.Error("Could not write response", zap.Error(err))
+	}
 }
 
 // extractPayload decodes the payload section of the OAuth token

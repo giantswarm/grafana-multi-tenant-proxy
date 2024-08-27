@@ -6,9 +6,10 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler/auth"
 	"go.uber.org/zap"
+
+	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler/auth"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 type Proxy struct {
@@ -54,7 +55,10 @@ func (p Proxy) Handler() http.HandlerFunc {
 
 		p.errorLogger.Print("Target server not configured")
 		w.WriteHeader(404)
-		w.Write([]byte("Not Found\n"))
+		_, err := w.Write([]byte("Not Found\n"))
+		if err != nil {
+			p.logger.Error("Could not write response", zap.Error(err))
+		}
 	}
 }
 
@@ -67,7 +71,7 @@ func (p Proxy) newProxy(targetServer string) *httputil.ReverseProxy {
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(targetServerURL)
 			r.Out.Host = targetServerURL.Host
-			r.Out.Header.Set("X-Forwarded-Host", targetServerURL.Host)
+			r.Out.Header.Add("X-Forwarded-Host", targetServerURL.Host)
 
 			orgID := r.In.Context().Value(auth.OrgIDKey)
 			if orgID != "" {

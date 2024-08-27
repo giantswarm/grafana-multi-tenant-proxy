@@ -1,17 +1,24 @@
----
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@5.6.0
+  architect: giantswarm/architect@dev:30a70d1ee2cf158cd0ea66d74cf4b0bf930009d3
 
 workflows:
   build:
     jobs:
-     - architect/push-to-registries:
+    - architect/go-build:
+        name: go-build
+        binary: grafana-multi-tenant-proxy
+        path: ./cmd/grafana-multi-tenant-proxy
+        filters:
+          tags:
+            only: /^v.*/
+
+    - architect/push-to-registries:
         context: architect
         name: push-to-registries
-        image: "giantswarm/grafana-multi-tenant-proxy"
-        dockerfile: "build/package/Dockerfile-with-tests"
+        requires:
+          - go-build
         filters:
           tags:
             only: /^v.*/

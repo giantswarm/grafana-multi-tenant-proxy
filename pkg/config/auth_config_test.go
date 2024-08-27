@@ -6,10 +6,10 @@ import (
 )
 
 func TestReadAuthConfigFile(t *testing.T) {
-	configInvalidLocation := "../../../../configs/no.config.yaml"
-	configInvalidConfigFileLocation := "../../../../configs/bad.yaml"
-	configSampleLocation := "../../../../configs/sample.yaml"
-	configMultipleUserLocation := "../../../../configs/multiple.user.yaml"
+	configInvalidLocation := "../../configs/no.config.yaml"
+	configInvalidConfigFileLocation := "../../configs/bad.yaml"
+	configSampleLocation := "../../configs/sample.yaml"
+	configMultipleUserLocation := "../../configs/multiple.user.yaml"
 	expectedSampleAuth := AuthenticationConfig{
 		[]User{
 			{
