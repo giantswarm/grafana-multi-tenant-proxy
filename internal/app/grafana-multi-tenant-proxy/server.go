@@ -29,7 +29,7 @@ var (
 		prometheus.HistogramOpts{
 			Name:                            "grafana_multi_tenant_proxy_http_request_duration_seconds",
 			Help:                            "Histogram of latencies for HTTP requests.",
-			Buckets:                         []float64{.05, 0.1, .25, .5, .75, 1, 2, 5, 20, 60},
+			Buckets:                         []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
 		},
 		[]string{"handler", "method"},
 	)
