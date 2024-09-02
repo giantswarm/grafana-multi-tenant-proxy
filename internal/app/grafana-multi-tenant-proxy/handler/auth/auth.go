@@ -8,7 +8,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 type key int
@@ -46,7 +46,10 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 		if err != nil {
 			am.logger.Error("Error while authenticating request", zap.String("url", r.URL.String()), zap.Error(err))
 			w.WriteHeader(401)
-			w.Write([]byte("Unauthorised\n"))
+			_, err := w.Write([]byte("Unauthorised\n"))
+			if err != nil {
+				am.logger.Error("Could not write response", zap.Error(err))
+			}
 			return
 		}
 
@@ -58,7 +61,10 @@ func (am AuthenticationMiddleware) Authenticate() http.HandlerFunc {
 				zap.Error(err),
 			)
 			w.WriteHeader(404)
-			w.Write([]byte("Not found\n"))
+			_, err := w.Write([]byte("Not found\n"))
+			if err != nil {
+				am.logger.Error("Could not write response", zap.Error(err))
+			}
 			return
 		}
 

@@ -3,8 +3,6 @@ package proxy
 import (
 	"fmt"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -14,9 +12,9 @@ import (
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler/auth"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 var (
@@ -27,9 +25,9 @@ var (
 
 	requestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:                            "grafana_multi_tenant_proxy_http_request_duration_seconds",
-			Help:                            "Histogram of latencies for HTTP requests.",
-			Buckets:                         []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+			Name:    "grafana_multi_tenant_proxy_http_request_duration_seconds",
+			Help:    "Histogram of latencies for HTTP requests.",
+			Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
 		},
 		[]string{"handler", "method"},
 	)
@@ -50,7 +48,7 @@ func initLogger(logLevel string) (*zap.Logger, error) {
 		return nil, err
 	}
 	zapConfig.Level = level
-  return zapConfig.Build()
+	return zapConfig.Build()
 }
 
 // Serve serves requests to the proxy
@@ -65,7 +63,12 @@ func Serve(c *cli.Context) error {
 		return cli.Exit(fmt.Sprintf("Could not create logger %v", err), -1)
 	}
 	// Ensure that the logger is flushed before the program exits
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			logger.Error("Logger sync failed", zap.Error(err))
+		}
+	}()
 
 	errorLogger, err := zap.NewStdLogAt(logger, zap.ErrorLevel)
 	if err != nil {
@@ -106,13 +109,20 @@ func Serve(c *cli.Context) error {
 			authenticationMiddleware.ApplyConfig(cfg)
 			proxy.ApplyConfig(cfg)
 			w.WriteHeader(200)
-			w.Write([]byte("OK"))
+			_, err = w.Write([]byte("OK"))
+			if err != nil {
+				logger.Error("Could not write response", zap.Error(err))
+			}
 		}
 	})
 
 	// Start the server
 	addr := fmt.Sprintf(":%d", c.Int("port"))
-	server := &http.Server{Addr: addr, ErrorLog: errorLogger}
+	server := &http.Server{
+		Addr:              addr,
+		ErrorLog:          errorLogger,
+		ReadHeaderTimeout: 60 * time.Second,
+	}
 	if err := server.ListenAndServe(); err != nil {
 		return cli.Exit(fmt.Sprintf("Grafana multi tenant proxy could not start %v", err), -1)
 	}

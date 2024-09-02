@@ -6,7 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 const (
@@ -38,5 +38,8 @@ func (a BasicAuthenticator) OnAuthenticationError(w http.ResponseWriter) {
 	a.logger.Error("Basic authentication failed")
 	w.Header().Set("WWW-Authenticate", `Basic realm="`+realm+`"`)
 	w.WriteHeader(401)
-	w.Write([]byte("Unauthorised\n"))
+	_, err := w.Write([]byte("Unauthorised\n"))
+	if err != nil {
+		a.logger.Error("Could not write response", zap.Error(err))
+	}
 }

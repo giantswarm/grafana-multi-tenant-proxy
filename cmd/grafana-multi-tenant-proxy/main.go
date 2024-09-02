@@ -3,8 +3,9 @@ package main
 import (
 	"os"
 
-	proxy "github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy"
 	"github.com/urfave/cli/v2"
+
+	proxy "github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy"
 )
 
 var (
@@ -53,5 +54,8 @@ func main() {
 		},
 	}
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		panic(err)
+	}
 }
