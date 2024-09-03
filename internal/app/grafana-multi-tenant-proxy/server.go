@@ -3,13 +3,14 @@ package proxy
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 
-	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/config"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler"
 	"github.com/giantswarm/grafana-multi-tenant-proxy/internal/app/grafana-multi-tenant-proxy/handler/auth"
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 )
 
 func initLogger(logLevel string) (*zap.Logger, error) {
@@ -35,7 +36,12 @@ func Serve(c *cli.Context) error {
 		return cli.Exit(fmt.Sprintf("Could not create logger %v", err), -1)
 	}
 	// Ensure that the logger is flushed before the program exits
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			logger.Error("Logger sync failed", zap.Error(err))
+		}
+	}()
 
 	errorLogger, err := zap.NewStdLogAt(logger, zap.ErrorLevel)
 	if err != nil {
@@ -71,13 +77,20 @@ func Serve(c *cli.Context) error {
 			authenticationMiddleware.ApplyConfig(cfg)
 			proxy.ApplyConfig(cfg)
 			w.WriteHeader(200)
-			w.Write([]byte("OK"))
+			_, err = w.Write([]byte("OK"))
+			if err != nil {
+				logger.Error("Could not write response", zap.Error(err))
+			}
 		}
 	})
 
 	// Start the server
 	addr := fmt.Sprintf(":%d", c.Int("port"))
-	server := &http.Server{Addr: addr, ErrorLog: errorLogger}
+	server := &http.Server{
+		Addr:              addr,
+		ErrorLog:          errorLogger,
+		ReadHeaderTimeout: 60 * time.Second,
+	}
 	if err := server.ListenAndServe(); err != nil {
 		return cli.Exit(fmt.Sprintf("Grafana multi tenant proxy could not start %v", err), -1)
 	}
