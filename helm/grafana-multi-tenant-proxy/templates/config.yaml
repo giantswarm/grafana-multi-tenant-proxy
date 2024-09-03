@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+  name: {{ include "proxy.fullname" $ }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+  config.yaml: |
+    targetServers: {{- tpl (toYaml .Values.proxy.targetServers) . | nindent 6 }}

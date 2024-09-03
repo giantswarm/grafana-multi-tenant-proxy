@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "proxy.labels" . | nindent 4 }}
+  name: {{ include "proxy.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
+spec:
+{{- if not .Values.proxy.autoscaling.enabled }}
+  replicas: {{ .Values.proxy.replicas }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "proxy.labels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: proxy
+          image: "{{ .Values.global.image.registry }}/{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
+          args:
+            - "run"
+            - "--auth-config=/etc/proxy/authn.yaml"
+            - "--proxy-config=/etc/proxy/config.yaml"
+            - "--log-level=WARN"
+            - "--port={{ .Values.proxy.containerPort }}"
+          {{- with .Values.proxy.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.proxy.containerPort }}
+              protocol: TCP
+          securityContext:
+            {{- toYaml .Values.proxy.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.proxy.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/proxy
+        - name: config-reloader
+          image: "{{ .Values.global.image.registry }}/{{ .Values.configReloader.image.repository }}:{{ .Values.configReloader.image.tag }}"
+          args:
+            - "--volume-dir=/etc/proxy"
+            - "--webhook-url=http://localhost:{{ .Values.proxy.containerPort }}/-/reload"
+            - "--web.listen-address=:9533"
+          ports: 
+          - name: reloader-web
+            containerPort: 9533
+            protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/proxy
+          {{- with .Values.configReloader.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.configReloader.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "proxy.fullname" $ }}-auth-config
+              - configMap:
+                  name: {{ include "proxy.fullname" $ }}-config

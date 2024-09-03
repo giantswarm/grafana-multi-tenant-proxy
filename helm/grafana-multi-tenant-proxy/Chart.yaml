@@ -1,0 +1,19 @@
+---
+apiVersion: v2
+name: grafana-multi-tenant-proxy
+description: Helm chart for Grafana Multi Tenant Proxy
+type: application
+appVersion: 0.6.0
+version: 0.6.0
+home: https://github.com/giantswarm/grafana-multi-tenant-proxy
+sources:
+  - https://github.com/giantswarm/grafana-multi-tenant-proxy
+icon: https://s.giantswarm.io/app-icons/grafana/1/dark.svg
+maintainers:
+  - name: giantswarm/team-atlas
+    email: team-atlas@giantswarm.io
+restrictions:
+  namespaceSingleton: true
+annotations:
+  application.giantswarm.io/team: atlas
+  ui.giantswarm.io/logo: https://s.giantswarm.io/app-icons/grafana/1/dark.svg
