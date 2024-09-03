@@ -3,7 +3,7 @@ apiVersion: v2
 name: grafana-multi-tenant-proxy
 description: Helm chart for Grafana Multi Tenant Proxy
 type: application
-appVersion: 0.5.0
+appVersion: 0.6.0
 version: 0.6.0
 home: https://github.com/giantswarm/grafana-multi-tenant-proxy
 sources:
