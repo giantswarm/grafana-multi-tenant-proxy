@@ -1,0 +1,17 @@
+checks:
+  addAllBuiltIn: true
+  exclude:
+  - "unset-memory-requirements"
+  - "unset-cpu-requirements"
+  - "use-namespace"
+  - "hpa-minimum-three-replicas"
+  - "default-service-account"
+  - "dnsconfig-options"
+  - "minimum-three-replicas"
+  - "no-liveness-probe"
+  - "no-node-affinity"
+  - "no-readiness-probe"
+  - "no-rolling-update-strategy"
+  - "non-isolated-pod"
+  - "required-annotation-email"
+  - "required-label-owner"

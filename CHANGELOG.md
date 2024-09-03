@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add helm chart to be able to deploy the proxy as a standalone component
+
 ### Changed
 
 - Move config package from `internal` to public packages so it can be imported in our operators.

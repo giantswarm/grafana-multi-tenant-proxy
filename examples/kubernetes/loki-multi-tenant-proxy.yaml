@@ -35,6 +35,24 @@ stringData:
       keepOrgId: true
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-multi-tenant-proxy-config
+  namespace: grafana
+  labels:
+    app: grafana-multi-tenant-proxy
+stringData:
+  config.yaml: |-
+    targetServers:
+    - name: "loki-read"
+      host: "http://read.loki.giantswarm.io"
+      target: "http://loki-gateway.grafana.svc.cluster.local:3100"
+    - name: "loki-write"
+      host: "http://write.loki.giantswarm.io"
+      target: "http://loki-gateway.grafana.svc.cluster.local:3100"
+      keepOrgId: true
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: grafana-multi-tenant-proxy
