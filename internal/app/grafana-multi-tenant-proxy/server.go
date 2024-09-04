@@ -18,26 +18,32 @@ import (
 )
 
 var (
-	requestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "grafana_multi_tenant_proxy_http_requests_total",
-		Help: "Count of all HTTP requests",
-	}, []string{"handler", "code", "method"})
+	metricLabels = []string{"code", "method"}
+
+	requestsTotal = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "grafana_multi_tenant_proxy_http_requests_total",
+			Help: "Count of all HTTP requests",
+		},
+		metricLabels,
+	)
 
 	requestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "grafana_multi_tenant_proxy_http_request_duration_seconds",
 			Help:    "Histogram of latencies for HTTP requests.",
-			Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"handler", "method"},
+		metricLabels,
 	)
 	responseSize = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "grafana_multi_tenant_proxy_http_response_size_bytes",
-			Help:    "Histogram of response size for HTTP requests.",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 7),
+			Name: "grafana_multi_tenant_proxy_http_response_size_bytes",
+			Help: "Histogram of response size for HTTP requests.",
+			// Using same bucket as ingress-nginx
+			Buckets: prometheus.LinearBuckets(10, 10, 10),
 		},
-		[]string{"handler", "method"},
+		metricLabels,
 	)
 )
 
@@ -92,7 +98,7 @@ func Serve(c *cli.Context) error {
 
 	// We handle metrics first to avoid calling the authentication middleware
 	http.Handle("/metrics", promhttp.Handler())
-	http.HandleFunc("/", instrumentHandler("default", handlers))
+	http.HandleFunc("/", instrumentHandler(handlers))
 
 	// Reload config endpoint
 	http.HandleFunc("/-/reload", func(w http.ResponseWriter, r *http.Request) {
@@ -130,16 +136,12 @@ func Serve(c *cli.Context) error {
 	return nil
 }
 
-func instrumentHandler(handlerName string, handler http.HandlerFunc) http.HandlerFunc {
-	handlerLabel := prometheus.Labels{"handler": handlerName}
+func instrumentHandler(handler http.HandlerFunc) http.HandlerFunc {
 	return promhttp.InstrumentHandlerDuration(
-		requestDuration.MustCurryWith(handlerLabel),
+		requestDuration,
 		promhttp.InstrumentHandlerResponseSize(
-			responseSize.MustCurryWith(handlerLabel),
-			promhttp.InstrumentHandlerCounter(
-				requestsTotal.MustCurryWith(handlerLabel),
-				handler,
-			),
+			responseSize,
+			promhttp.InstrumentHandlerCounter(requestsTotal, handler),
 		),
 	)
 }
