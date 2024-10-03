@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,3 +9,4 @@ metadata:
 data:
   config.yaml: |
     targetServers: {{- tpl (toYaml .Values.proxy.targetServers) . | nindent 6 }}
+{{- end }}
