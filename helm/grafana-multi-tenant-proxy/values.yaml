@@ -3,6 +3,8 @@ nameOverride: null
 # -- Overrides the chart's computed fullname
 fullnameOverride: null
 
+enabled: true
+
 global:
   image:
     # -- Overrides the Docker registry globally for all images

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Add support to disable the whole chart if logging is disabled at the installation level.
+
 ## [0.7.0] - 2024-09-17
 
 ### Added

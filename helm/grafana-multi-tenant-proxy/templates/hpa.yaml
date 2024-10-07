@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- $autoscalingv2 := .Capabilities.APIVersions.Has "autoscaling/v2" -}}
 {{- if .Values.proxy.autoscaling.enabled }}
 {{- if $autoscalingv2 }}
@@ -43,4 +44,5 @@ spec:
         targetAverageUtilization: {{ . }}
         {{- end }}
   {{- end }}
+{{- end }}
 {{- end }}
