@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/prometheus/client_golang v1.20.5
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
 	go.uber.org/zap v1.27.0
 	sigs.k8s.io/yaml v1.4.0
