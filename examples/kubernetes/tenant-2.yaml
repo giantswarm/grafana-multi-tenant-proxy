@@ -61,7 +61,7 @@ spec:
       - name: promtail
         args:
           - -config.file=/etc/promtail/promtail.yaml
-        image: grafana/promtail:3.4.2
+        image: grafana/promtail:3.4.3
         volumeMounts:
         - name: shared-data
           mountPath: /loki/logs
