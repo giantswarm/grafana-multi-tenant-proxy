@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Stop pushing the proxy to capi collections
 
+### Fixed
+
+- Fix golangci by using filepath.Clean
+
 ## [0.8.0] - 2024-10-07
 
 ### Changed
