@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 
 	"sigs.k8s.io/yaml"
 )
@@ -20,7 +21,7 @@ type User struct {
 
 // readAuthConfigFile read a configuration file in the path `location` and returns a Config object
 func readAuthConfigFile(location string) (*AuthenticationConfig, error) {
-	data, err := os.ReadFile(location)
+	data, err := os.ReadFile(filepath.Clean(location))
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 
 	"sigs.k8s.io/yaml"
 )
@@ -19,7 +20,7 @@ type TargetServer struct {
 
 // readProxyConfigFile read a configuration file in the path `location` and returns a ProxyConfig object
 func readProxyConfigFile(location string) (*ProxyConfig, error) {
-	data, err := os.ReadFile(location)
+	data, err := os.ReadFile(filepath.Clean(location))
 	if err != nil {
 		return nil, err
 	}
